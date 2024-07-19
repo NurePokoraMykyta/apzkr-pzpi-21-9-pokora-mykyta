@@ -36,9 +36,9 @@ def logout(current_user: dict = Depends(get_current_user)):
 
 
 @auth_router.get("/me")
-def get_user(current_user: dict = Depends(get_current_user)):
+def get_user(current_user: dict = Depends(get_current_user), db: Session = Depends(db_session)):
     try:
-        return user_service.get_user_by_uid(current_user['uid'])
+        return user_service.get_user_by_uid(db, current_user['uid'])
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
