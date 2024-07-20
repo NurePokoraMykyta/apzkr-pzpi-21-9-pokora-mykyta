@@ -4,6 +4,8 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.endpoints.auth import auth_router
+from api.endpoints.company import company_router
+from api.endpoints.role import role_router
 from core.config import settings
 from data.session import setup_database, teardown_database
 
@@ -35,6 +37,8 @@ async def shutdown():
 
 api_router = APIRouter()
 app.include_router(auth_router, prefix=settings.API_STR, tags=["Авторизація"])
+app.include_router(role_router, prefix=settings.API_STR, tags=["Ролі"])
+app.include_router(company_router, prefix=settings.API_STR, tags=["Компанії"])
 
 
 @app.get("/")

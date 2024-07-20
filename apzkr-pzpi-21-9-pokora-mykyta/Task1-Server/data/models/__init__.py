@@ -7,5 +7,4 @@ from .food_patch import FoodPatch
 from .iot_device import IoTDevice
 from .feeding_schedule import FeedingSchedule
 from .notification import Notification, NotificationType
-from .permission import Permission
 from .role import Role

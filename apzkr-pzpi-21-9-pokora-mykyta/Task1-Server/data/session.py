@@ -15,20 +15,20 @@ DatabaseSession = sessionmaker(bind=db_engine, autocommit=False, autoflush=False
 Base = declarative_base()
 
 
-def setup_database():
-    Base.metadata.create_all(bind=db_engine)
-
-
-def teardown_database():
-    Base.metadata.drop_all(bind=db_engine)
-
-
 def db_session():
     session = DatabaseSession()
     try:
         yield session
     finally:
         session.close()
+
+
+def setup_database():
+    Base.metadata.create_all(bind=db_engine)
+
+
+def teardown_database():
+    db_engine.dispose()
 
 
 __all__ = ["db_session"]
