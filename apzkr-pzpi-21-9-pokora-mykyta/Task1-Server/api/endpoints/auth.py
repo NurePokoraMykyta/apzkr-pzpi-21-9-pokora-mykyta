@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 auth_router = APIRouter(tags=["Авторизація"], prefix="/auth")
 
 
-@auth_router.post("/register")
+@auth_router.post("/register", summary="Реєстрація користувача")
 def register(user: UserRegisterRequest, db: Session = Depends(db_session)):
     try:
         user = auth_service.create_user(db, user.email, user.password, user.display_name)
@@ -19,7 +19,7 @@ def register(user: UserRegisterRequest, db: Session = Depends(db_session)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@auth_router.post("/login")
+@auth_router.post("/login", summary="Авторизація користувача")
 def login(user: BaseUserRequest):
     try:
         return auth_service.login_user(user.email, user.password)
@@ -27,7 +27,7 @@ def login(user: BaseUserRequest):
         raise HTTPException(status_code=401, detail=str(e))
 
 
-@auth_router.post("/logout")
+@auth_router.post("/logout", summary="Вихід користувача")
 def logout(current_user: dict = Depends(get_current_user)):
     try:
         return auth_service.logout_user(current_user['uid'])
@@ -35,7 +35,7 @@ def logout(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@auth_router.get("/me")
+@auth_router.get("/me", summary="Отримання даних користувача")
 def get_user(current_user: dict = Depends(get_current_user), db: Session = Depends(db_session)):
     try:
         return user_service.get_user_by_uid(db, current_user['uid'])
@@ -43,7 +43,7 @@ def get_user(current_user: dict = Depends(get_current_user), db: Session = Depen
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@auth_router.put("/me")
+@auth_router.put("/me", summary="Оновлення даних користувача")
 def update_user(
         user: UserUpdateRequest,
         current_user: dict = Depends(get_current_user),
@@ -60,7 +60,7 @@ def update_user(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@auth_router.delete("/me")
+@auth_router.delete("/me", summary="Видалення користувача")
 def delete_user(current_user: dict = Depends(get_current_user), db: Session = Depends(db_session)):
     try:
         return user_service.delete_user(db, current_user['uid'])

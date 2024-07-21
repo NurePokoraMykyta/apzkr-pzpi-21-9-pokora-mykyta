@@ -1,18 +1,4 @@
-from fastapi import Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from functools import wraps
-from typing import List, Callable, Optional
-
-from api.user import get_current_user
-from data.models.role import Role
-from data.models.user import User, user_companies
-from data.session import db_session
-
-ADMIN_ROLE = "адмін"
-OWNER_ROLE = "власник"
-
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from functools import wraps
@@ -78,29 +64,6 @@ class RoleManager:
             )
         self.db.commit()
 
-    def get_user_permissions(self, firebase_uid: str, company_id: int):
-        user = self.db.query(User).filter(User.firebase_uid == firebase_uid).first()
-        if not user:
-            return []
-
-        user_role = self.db.query(Role).join(
-            user_companies,
-            and_(
-                user_companies.c.role_id == Role.id,
-                user_companies.c.user_id == user.id,
-                user_companies.c.company_id == company_id
-            )
-        ).first()
-
-        if not user_role:
-            return []
-
-        return user_role.permissions
-
-    def check_permissions(self, firebase_uid: str, required_permissions: List[str], company_id: int = None) -> bool:
-        user_permissions = self.get_user_permissions(firebase_uid, company_id)
-        return '*' in user_permissions or all(perm in user_permissions for perm in required_permissions)
-
     def get_company_roles(self, company_id: int):
         return self.db.query(Role).filter(
             user_companies.c.company_id == company_id
@@ -142,29 +105,30 @@ class RoleManager:
         ).first()
         return user_company is not None
 
+    def get_user_permissions(self, firebase_uid: str, company_id: int):
+        user = self.db.query(User).filter(User.firebase_uid == firebase_uid).first()
+        if not user:
+            return []
+
+        user_role = self.db.query(Role).join(
+            user_companies,
+            and_(
+                user_companies.c.role_id == Role.id,
+                user_companies.c.user_id == user.id,
+                user_companies.c.company_id == company_id
+            )
+        ).first()
+
+        if not user_role:
+            return []
+
+        return user_role.permissions
+
+    def check_permissions(self, firebase_uid: str, required_permissions: List[str], company_id: int = None) -> bool:
+        user_permissions = self.get_user_permissions(firebase_uid, company_id)
+        return '*' in user_permissions or all(perm in user_permissions for perm in required_permissions)
+
 
 def get_role_manager(db: Session = Depends(db_session)):
     return RoleManager(db)
 
-
-def require_permissions(*required_permissions: str):
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        async def wrapper(
-                *args,
-                current_user: dict = Depends(get_current_user),
-                role_manager: RoleManager = Depends(get_role_manager),
-                **kwargs
-        ):
-            company_id = kwargs.get('company_id')
-            if company_id:
-                if not role_manager.check_permissions(current_user['uid'], list(required_permissions), company_id):
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail="Не вистачає прав для виконання цієї дії"
-                    )
-            return await func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator

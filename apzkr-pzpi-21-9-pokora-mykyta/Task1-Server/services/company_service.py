@@ -49,17 +49,29 @@ class CompanyService:
             self.db.rollback()
             raise ValueError("Компанія з такою назвою вже існує")
 
-    def get_company(self, company_id: int) -> Company:
-        company = self.db.query(Company).filter(Company.id == company_id).first()
+    def get_user_company(self, company_id: int, firebase_uid: str) -> Company:
+        user = self.db.query(User).filter(User.firebase_uid == firebase_uid).first()
+        if not user:
+            raise ValueError("Користувача не знайдено")
+
+        company = self.db.query(Company).join(user_companies).filter(
+            Company.id == company_id,
+            user_companies.c.user_id == user.id
+        ).first()
+
         if not company:
-            raise ValueError("Компанію не знайдено")
+            raise ValueError("Компанію не знайдено або у вас немає доступу до неї")
+
         return company
 
-    def get_companies(self) -> List[Company]:
-        return self.db.query(Company).all()
+    def get_user_companies(self, firebase_uid: str) -> List[Company]:
+        user = self.db.query(User).filter(User.firebase_uid == firebase_uid).first()
+        if not user:
+            raise ValueError("Користувача не знайдено")
+        return self.db.query(Company).join(user_companies).filter(user_companies.c.user_id == user.id).all()
 
-    def update_company(self, company_id: int, company_data: CompanyUpdate) -> Company:
-        company = self.get_company(company_id)
+    def update_company(self, company_id: int, company_data: CompanyUpdate, firebase_uid: str) -> Company:
+        company = self.get_user_company(company_id, firebase_uid)
 
         for key, value in company_data.dict(exclude_unset=True).items():
             setattr(company, key, value)
@@ -72,32 +84,41 @@ class CompanyService:
             self.db.rollback()
             raise ValueError("Компанія з такою назвою вже існує")
 
-    def delete_company(self, company_id: int) -> dict:
-        company = self.get_company(company_id)
+    def delete_company(self, company_id: int, firebase_uid: str) -> dict:
+        company = self.get_user_company(company_id, firebase_uid)
         self.db.delete(company)
         self.db.commit()
         return {"message": "Компанію успішно видалено"}
 
-    def get_company_users(self, company_id: int, skip: int = 0, limit: int = 100):
-        company = self.get_company(company_id)
+    def get_company_users(self, company_id: int, firebase_uid: str):
+        self.get_user_company(company_id, firebase_uid)
         return self.db.query(user_companies).filter(
             user_companies.c.company_id == company_id
-        ).offset(skip).limit(limit).all()
+        ).all()
 
-    def add_user_to_company(self, company_id: int, user_firebase_uid: str, role_id: int):
-        company = self.get_company(company_id)
-        user = self.db.query(User).filter(User.firebase_uid == user_firebase_uid).first()
+    def add_user_to_company(self, company_id: int, email: str, role_id: int, firebase_uid: str):
+        self.get_user_company(company_id, firebase_uid)
+        user = self.db.query(User).filter(User.email == email).first()
         if not user:
             raise ValueError("Користувача не знайдено")
+
+        exists = self.db.query(user_companies).filter(
+            user_companies.c.company_id == company_id,
+            user_companies.c.user_id == user.id
+        ).first()
+
+        if exists:
+            raise ValueError("Користувач вже є у цій компанії")
+
         try:
             self.role_manager.assign_role(user.id, role_id, company_id)
             return {"message": "Користувача успішно додано до компанії"}
         except ValueError as e:
             raise ValueError(str(e))
 
-    def remove_user_from_company(self, company_id: int, user_firebase_uid: str):
-        company = self.get_company(company_id)
-        user = self.db.query(User).filter(User.firebase_uid == user_firebase_uid).first()
+    def remove_user_from_company(self, company_id: int, email: str, firebase_uid: str):
+        self.get_user_company(company_id, firebase_uid)
+        user = self.db.query(User).filter(User.email == email).first()
         if not user:
             raise ValueError("Користувача не знайдено")
         result = self.db.query(user_companies).filter(
