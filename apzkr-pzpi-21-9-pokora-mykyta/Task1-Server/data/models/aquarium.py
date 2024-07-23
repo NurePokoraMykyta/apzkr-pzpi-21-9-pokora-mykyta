@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from data.session import Base
 
@@ -11,6 +11,8 @@ class Aquarium(Base):
     capacity = Column(Float, nullable=False)  # в литрах
     description = Column(String)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     company = relationship("Company", back_populates="aquariums")
     feeding_schedules = relationship("FeedingSchedule", back_populates="aquarium")

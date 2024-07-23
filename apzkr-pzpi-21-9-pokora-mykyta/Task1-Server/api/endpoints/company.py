@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from typing import List, Annotated
 
 from data import Company, db_session
+from schemas.aquarium_schemas import AquariumResponse, AquariumCreate
 from schemas.company_schemas import CompanyCreate, CompanyUpdate, CompanyResponse
 from services.user_service import user_service
 from services.company_service import CompanyService, get_company_manager
@@ -153,5 +154,37 @@ async def remove_user_from_company(
 ):
     try:
         return company_service.remove_user_from_company(company_id, email, current_user['uid'])
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@company_router.post("/{company_id}/aquariums", response_model=AquariumResponse, summary="Створення нового акваріума")
+@require_permissions("create_aquarium")
+async def create_aquarium(
+        aquarium_data: AquariumCreate,
+        company_id: int = Path(..., description="ID компанії"),
+        current_user: dict = Depends(get_current_user),
+        company_service: CompanyService = Depends(get_company_manager),
+        role_manager: RoleManager = Depends(get_role_manager)
+):
+    try:
+        new_aquarium = company_service.create_aquarium(company_id, aquarium_data, current_user['uid'])
+        return AquariumResponse.from_orm(new_aquarium)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@company_router.get("/{company_id}/aquariums", response_model=List[AquariumResponse],
+                    summary="Отримання списку акваріумів компанії")
+@require_permissions("view_company_aquariums")
+async def get_company_aquariums(
+        company_id: int = Path(..., description="ID компанії"),
+        current_user: dict = Depends(get_current_user),
+        company_service: CompanyService = Depends(get_company_manager),
+        role_manager: RoleManager = Depends(get_role_manager)
+):
+    try:
+        aquariums = company_service.get_company_aquariums(company_id, current_user['uid'])
+        return [AquariumResponse.from_orm(aquarium) for aquarium in aquariums]
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

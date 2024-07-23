@@ -1,10 +1,13 @@
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 
+from data import Aquarium, Fish
 from data.session import db_session
 from data.models.company import Company
 from data.models.user import user_companies
+from schemas.aquarium_schemas import AquariumCreate, AquariumUpdate
 from schemas.company_schemas import CompanyCreate, CompanyUpdate
+from schemas.fish_schemas import FishCreate, FishUpdate
 from services.role_manager import RoleManager, get_role_manager
 from sqlalchemy.orm import Session
 from fastapi import Depends
@@ -18,7 +21,8 @@ from data.models.company import Company
 from data.models.user import User, user_companies
 from schemas.company_schemas import CompanyCreate, CompanyUpdate
 from services.role_manager import RoleManager, get_role_manager
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
 from fastapi import Depends
 
 
@@ -130,6 +134,166 @@ class CompanyService:
             return {"message": "Користувача успішно видалено з компанії"}
         else:
             raise ValueError("Користувача не знайдено в цій компанії")
+
+    def create_aquarium(self, company_id: int, aquarium_data: AquariumCreate, owner_firebase_uid: str) -> Aquarium:
+        try:
+            company = self.get_user_company(company_id, owner_firebase_uid)
+        except ValueError as e:
+            raise ValueError(f"Помилка при отриманні компанії: {str(e)}")
+
+        new_aquarium = Aquarium(
+            name=aquarium_data.name,
+            capacity=aquarium_data.capacity,
+            description=aquarium_data.description,
+            company_id=company.id,
+            created_at=func.now(),
+            updated_at=func.now()
+        )
+
+        try:
+            self.db.add(new_aquarium)
+            self.db.commit()
+            self.db.refresh(new_aquarium)
+            return new_aquarium
+        except IntegrityError:
+            self.db.rollback()
+            raise ValueError("Акваріум з такою назвою вже існує в даній компанії")
+        except Exception as e:
+            self.db.rollback()
+            raise ValueError(f"Помилка при створенні акваріума: {str(e)}")
+
+    def get_company_aquariums(self, company_id: int, firebase_uid: str) -> List[Aquarium]:
+        try:
+            company = self.get_user_company(company_id, firebase_uid)
+        except ValueError as e:
+            raise ValueError(f"Помилка при отриманні компанії: {str(e)}")
+
+        return self.db.query(Aquarium).options(
+            joinedload(Aquarium.company),
+            joinedload(Aquarium.feeding_schedules),
+            joinedload(Aquarium.water_parameters),
+            joinedload(Aquarium.fish),
+            joinedload(Aquarium.iot_device)
+        ).filter(Aquarium.company_id == company.id).all()
+
+    def get_company_aquarium(self, company_id: int, aquarium_id: int, firebase_uid: str) -> Aquarium:
+        try:
+            company = self.get_user_company(company_id, firebase_uid)
+        except ValueError as e:
+            raise ValueError(f"Помилка при отриманні компанії: {str(e)}")
+
+        aquarium = self.db.query(Aquarium).options(
+            joinedload(Aquarium.feeding_schedules),
+            joinedload(Aquarium.water_parameters),
+            joinedload(Aquarium.fish),
+            joinedload(Aquarium.iot_device)
+        ).filter(Aquarium.id == aquarium_id, Aquarium.company_id == company.id).first()
+
+        if not aquarium:
+            raise ValueError("Акваріум не знайдено в зазначеній компанії")
+
+        return aquarium
+
+    def update_company_aquarium(self, company_id: int, aquarium_id: int, aquarium_data: AquariumUpdate,
+                                firebase_uid: str) -> Aquarium:
+        try:
+            aquarium = self.get_company_aquarium(company_id, aquarium_id, firebase_uid)
+        except ValueError as e:
+            raise ValueError(f"Помилка при отриманні акваріума: {str(e)}")
+
+        for key, value in aquarium_data.dict(exclude_unset=True).items():
+            setattr(aquarium, key, value)
+
+        try:
+            self.db.commit()
+            self.db.refresh(aquarium)
+            return aquarium
+        except IntegrityError:
+            self.db.rollback()
+            raise ValueError("Акваріум з такою назвою вже існує в даній компанії")
+        except Exception as e:
+            self.db.rollback()
+            raise ValueError(f"Помилка при оновленні акваріума: {str(e)}")
+
+    def delete_company_aquarium(self, company_id: int, aquarium_id: int, firebase_uid: str) -> dict:
+        try:
+            aquarium = self.get_company_aquarium(company_id, aquarium_id, firebase_uid)
+        except ValueError as e:
+            raise ValueError(f"Помилка при отриманні акваріума: {str(e)}")
+
+        try:
+            self.db.delete(aquarium)
+            self.db.commit()
+            return {"message": "Акваріум успішно видалено"}
+        except Exception as e:
+            self.db.rollback()
+            raise ValueError(f"Помилка при видаленні акваріума: {str(e)}")
+
+    def add_fish_to_aquarium(self, company_id: int, aquarium_id: int, fish_data: FishCreate, firebase_uid: str) -> Fish:
+        aquarium = self.get_company_aquarium(company_id, aquarium_id, firebase_uid)
+        existing_fish = self.db.query(Fish).filter(
+            Fish.aquarium_id == aquarium.id,
+            Fish.species == fish_data.species
+        ).first()
+
+        if existing_fish:
+            existing_fish.quantity += fish_data.quantity
+            self.db.commit()
+            self.db.refresh(existing_fish)
+            return existing_fish
+        else:
+            new_fish = Fish(**fish_data.dict(), aquarium_id=aquarium.id)
+            self.db.add(new_fish)
+            self.db.commit()
+            self.db.refresh(new_fish)
+            return new_fish
+
+    def get_aquarium_fish(self, company_id: int, aquarium_id: int, firebase_uid: str) -> List[Fish]:
+        aquarium = self.get_company_aquarium(company_id, aquarium_id, firebase_uid)
+        return self.db.query(Fish).filter(Fish.aquarium_id == aquarium.id).all()
+
+    def get_fish(self, company_id: int, aquarium_id: int, fish_id: int, firebase_uid: str) -> Fish:
+        aquarium = self.get_company_aquarium(company_id, aquarium_id, firebase_uid)
+        fish = self.db.query(Fish).filter(Fish.id == fish_id, Fish.aquarium_id == aquarium.id).first()
+        if not fish:
+            raise ValueError("Рибу не знайдено")
+        return fish
+
+    def update_fish(self, company_id: int, aquarium_id: int, fish_id: int, fish_data: FishUpdate,
+                    firebase_uid: str) -> Fish:
+        fish = self.get_fish(company_id, aquarium_id, fish_id, firebase_uid)
+
+        if fish_data.quantity is not None:
+            if fish_data.quantity > 0:
+                fish.quantity = fish_data.quantity
+            elif fish_data.quantity == 0:
+                self.db.delete(fish)
+                self.db.commit()
+                return None
+            else:
+                raise ValueError("Кількість риб не може бути від'ємною")
+
+        if fish_data.species:
+            fish.species = fish_data.species
+
+        self.db.commit()
+        self.db.refresh(fish)
+        return fish
+
+    def remove_fish(self, company_id: int, aquarium_id: int, fish_id: int, quantity: int, firebase_uid: str) -> dict:
+        fish = self.get_fish(company_id, aquarium_id, fish_id, firebase_uid)
+        if quantity > fish.quantity:
+            raise ValueError("Кількість риб для видалення перевищує наявну кількість")
+
+        fish.quantity -= quantity
+        if fish.quantity == 0:
+            self.db.delete(fish)
+            message = "Рибу повністю видалено з акваріума"
+        else:
+            message = f"Кількість риб зменшено на {quantity}"
+
+        self.db.commit()
+        return {"message": message}
 
 
 def get_company_manager(
