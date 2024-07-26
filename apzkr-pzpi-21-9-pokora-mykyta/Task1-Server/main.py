@@ -12,6 +12,7 @@ from api.endpoints.device import device_router
 from api.endpoints.feeding_schedule import feeding_schedule_router
 from api.endpoints.fish import fish_router
 from api.endpoints.role import role_router
+from api.endpoints.ws_router import ws_router
 from core.config import settings
 from data.session import setup_database, teardown_database
 from services.connection_manager import ConnectionManager
@@ -59,6 +60,7 @@ app.include_router(fish_router, prefix=settings.API_STR, tags=["Риби"])
 app.include_router(device_router, prefix=settings.API_STR, tags=["Пристрої"])
 app.include_router(feeding_schedule_router, prefix=settings.API_STR, tags=["Розклади годування"])
 app.include_router(aquarium_feeding_router, prefix=settings.API_STR, tags=["Годування акваріумів"])
+app.include_router(ws_router, tags=["WebSocket"])
 
 
 @app.get("/")

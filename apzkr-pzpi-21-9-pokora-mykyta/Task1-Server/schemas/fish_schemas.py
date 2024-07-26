@@ -9,7 +9,7 @@ class FishBase(BaseModel):
 
 
 class FishCreate(FishBase):
-    aquarium_id: int = Field(..., description="ID акваріума")
+    company_id: int = Field(..., description="ID компанії")
 
 
 class FishUpdate(BaseModel):

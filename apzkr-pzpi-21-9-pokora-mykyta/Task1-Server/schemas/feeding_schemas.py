@@ -9,7 +9,7 @@ class FeedingScheduleBase(BaseModel):
 
 
 class FeedingScheduleCreate(FeedingScheduleBase):
-    aquarium_id: int = Field(..., description="ID акваріума")
+    pass
 
 
 class FeedingScheduleUpdate(BaseModel):

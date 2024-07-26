@@ -29,21 +29,12 @@ def require_permissions(*required_permissions: str):
                 **kwargs
         ):
             company_id = kwargs.get('company_id')
-            logger.debug(f"Checking permissions for user {current_user['uid']}")
-            logger.debug(f"Required permissions: {required_permissions}")
-            logger.debug(f"Company ID: {company_id}")
-
             user_permissions = role_manager.get_user_permissions(current_user['uid'], company_id)
-            logger.debug(f"User permissions: {user_permissions}")
-
             has_permission = role_manager.check_permissions(current_user['uid'], list(required_permissions), company_id)
-            logger.debug(f"Permission check result: {has_permission}")
 
             if not has_permission:
-                logger.warning(f"Permission denied for user {current_user['uid']}")
                 raise HTTPException(status_code=403, detail="Не вистачає прав для виконання цієї дії")
 
-            logger.debug(f"Permissions granted for user {current_user['uid']}")
             return await func(*args, current_user=current_user, role_manager=role_manager, **kwargs)
 
         return wrapper

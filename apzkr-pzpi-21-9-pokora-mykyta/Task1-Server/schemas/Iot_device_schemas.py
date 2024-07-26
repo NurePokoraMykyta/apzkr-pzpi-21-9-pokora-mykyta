@@ -8,12 +8,11 @@ class IoTDeviceBase(BaseModel):
 
 
 class IoTDeviceCreate(IoTDeviceBase):
-    aquarium_id: int = Field(..., description="ID акваріума")
+    pass
 
 
 class IoTDeviceUpdate(BaseModel):
     unique_address: Optional[str] = Field(None, description="Унікальна адреса IoT пристрою")
-    aquarium_id: Optional[int] = Field(None, description="ID акваріума")
 
 
 class IoTDeviceResponse(IoTDeviceBase):

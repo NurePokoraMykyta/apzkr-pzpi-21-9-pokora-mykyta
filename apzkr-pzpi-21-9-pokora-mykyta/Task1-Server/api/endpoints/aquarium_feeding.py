@@ -20,13 +20,14 @@ def require_permissions(*required_permissions: str):
                 device_service: DeviceFeedingService = Depends(get_device_feeding_service),
                 **kwargs
         ):
+            company_id = 0
             aquarium_id = kwargs.get('aquarium_id')
 
             try:
-                aquarium = device_service.get_aquarium(aquarium_id)
-                company_id = aquarium.company_id
+                device = device_service.get_aquarium_device(aquarium_id)
+                company_id = device.aquarium.company_id
             except ValueError:
-                raise HTTPException(status_code=404, detail="Акваріум не знайдено")
+                raise HTTPException(status_code=404, detail=company_id)
 
             user_permissions = role_manager.get_user_permissions(current_user['uid'], company_id)
 
@@ -53,7 +54,7 @@ async def create_feeding_schedule(
         device_service: DeviceFeedingService = Depends(get_device_feeding_service)
 ):
     try:
-        new_schedule = device_service.add_feeding_schedule(schedule_data)
+        new_schedule = device_service.add_feeding_schedule(aquarium_id, schedule_data)
         return FeedingScheduleResponse.from_orm(new_schedule)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

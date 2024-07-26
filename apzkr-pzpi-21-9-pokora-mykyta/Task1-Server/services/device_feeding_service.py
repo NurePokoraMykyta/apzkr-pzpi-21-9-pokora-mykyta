@@ -6,11 +6,12 @@ from data import db_session
 from data.models import IoTDevice, FoodPatch, FeedingSchedule, Aquarium
 from typing import List
 
-from schemas.Iot_device_schemas import IoTDeviceCreate
+from schemas.Iot_device_schemas import IoTDeviceCreate, IoTDeviceUpdate
 from schemas.feeding_schemas import FeedingScheduleCreate, FeedingScheduleUpdate
 
 import logging
 
+from schemas.water_parameter_schemas import WaterParameterCreate
 from services.connection_manager import ConnectionManager
 from fastapi import Depends
 
@@ -22,11 +23,11 @@ class DeviceFeedingService:
         self.db = db
         self.connection_manager = connection_manager
 
-    def setup_device(self, device_data: IoTDeviceCreate) -> IoTDevice:
-        aquarium = self.db.query(Aquarium).filter(Aquarium.id == device_data.aquarium_id).first()
+    def setup_device(self, aquarium_id: int, device_data: IoTDeviceCreate) -> IoTDevice:
+        aquarium = self.db.query(Aquarium).filter(Aquarium.id == aquarium_id).first()
         if not aquarium:
-            logger.error(f"Акваріум з id {device_data.aquarium_id} не знайдено")
-            raise ValueError(f"Акваріум з id {device_data.aquarium_id} не знайдено")
+            logger.error(f"Акваріум з id {aquarium_id} не знайдено")
+            raise ValueError(f"Акваріум з id {aquarium_id} не знайдено")
 
         existing_device = self.db.query(IoTDevice).filter(
             IoTDevice.unique_address == device_data.unique_address).first()
@@ -35,28 +36,55 @@ class DeviceFeedingService:
             raise ValueError(f"Пристрій з адресою {device_data.unique_address} вже існує")
 
         existing_aquarium_device = self.db.query(IoTDevice).filter(
-            IoTDevice.aquarium_id == device_data.aquarium_id).first()
+            IoTDevice.aquarium_id == aquarium_id).first()
         if existing_aquarium_device:
-            logger.error(f"Акваріум з id {device_data.aquarium_id} вже має пристрій")
-            raise ValueError(f"Акваріум з id {device_data.aquarium_id} вже має пристрій")
+            logger.error(f"Акваріум з id {aquarium_id} вже має пристрій")
+            raise ValueError(f"Акваріум з id {aquarium_id} вже має пристрій")
 
         new_device = IoTDevice(
             unique_address=device_data.unique_address,
-            aquarium_id=device_data.aquarium_id,
+            aquarium_id=aquarium_id,
             is_active=True
         )
         self.db.add(new_device)
         self.db.commit()
         self.db.refresh(new_device)
 
-        logger.info(f"Новий пристрій успішно встановлено для акваріума {device_data.aquarium_id}")
+        logger.info(f"Новий пристрій успішно встановлено для акваріума {aquarium_id}")
         return new_device
+
+    def get_aquarium(self, aquarium_id: int) -> Aquarium:
+        aquarium = self.db.query(Aquarium).filter(Aquarium.id == aquarium_id).first()
+        if not aquarium:
+            logger.error(f"Акваріум з id {aquarium_id} не знайдено")
+            raise ValueError(f"Акваріум з id {aquarium_id} не знайдено")
+        return aquarium
 
     def get_aquarium_device(self, aquarium_id: int) -> IoTDevice:
         device = self.db.query(IoTDevice).filter(IoTDevice.aquarium_id == aquarium_id).first()
         if not device:
             logger.error(f"IoT пристрій не знайдено для акваріума {aquarium_id}")
             raise ValueError(f"IoT пристрій не знайдено для акваріума {aquarium_id}")
+        return device
+
+    def update_device(self, aquarium_id: int, device_data: IoTDeviceUpdate) -> IoTDevice:
+        device = self.get_aquarium_device(aquarium_id)
+        if not device:
+            logger.error(f"IoT пристрій не знайдено для акваріума {aquarium_id}")
+            raise ValueError(f"IoT пристрій не знайдено для акваріума {aquarium_id}")
+
+        for key, value in device_data.dict(exclude_unset=True).items():
+            setattr(device, key, value)
+
+        try:
+            self.db.commit()
+            self.db.refresh(device)
+            logger.info(f"Оновлено пристрій для акваріума {aquarium_id}")
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Помилка при оновленні пристрою для акваріума {aquarium_id}: {str(e)}")
+            raise ValueError(f"Помилка при оновленні пристрою: {str(e)}")
+
         return device
 
     async def activate_device(self, device_id: int) -> IoTDevice:
@@ -91,13 +119,12 @@ class DeviceFeedingService:
             raise ValueError(f"Помилка при деактивації пристрою: {str(e)}")
         return device
 
-    def add_feeding_schedule(self, schedule_data: FeedingScheduleCreate) -> FeedingSchedule:
+    def add_feeding_schedule(self, aquarium_id, schedule_data: FeedingScheduleCreate) -> FeedingSchedule:
         self.get_aquarium_device(schedule_data.aquarium_id)
 
         new_schedule = FeedingSchedule(
             food_type=schedule_data.food_type,
             scheduled_time=schedule_data.scheduled_time,
-            aquarium_id=schedule_data.aquarium_id
         )
         self.db.add(new_schedule)
         self.db.commit()
@@ -132,6 +159,19 @@ class DeviceFeedingService:
         self.db.commit()
         logger.info(f"Видалено розклад годування {schedule_id}")
 
+    async def send_feed_command(self, device_address: str, food_type: str, quantity: int):
+        try:
+            await self.connection_manager.send_command(device_address, {
+                "action": "feed",
+                "food_type": food_type,
+                "quantity": quantity,
+                "duration": 1.0  # Тривалість годування в секундах сервоприводу
+            })
+            logger.info(f"Команда на годування відправлена пристрою {device_address}")
+        except Exception as e:
+            logger.error(f"Помилка при відправці команди на годування: {str(e)}")
+            raise
+
     async def feed_now(self, aquarium_id: int) -> dict:
         device = self.get_aquarium_device(aquarium_id)
         if not device.is_active:
@@ -148,20 +188,17 @@ class DeviceFeedingService:
             return {"status": "error", "message": "Корм закінчився"}
 
         try:
-            await self.connection_manager.send_command(device.unique_address, {
-                "action": "feed",
-                "food_type": food_patch.food_type,
-                "quantity": 1
-            })
+            await self.send_feed_command(device.unique_address, food_patch.food_type, 1)
+
+            # Зменшуємо кількість корму в патчі тільки якщо команда відправлена успішно
+            food_patch.quantity -= 1
+            self.db.commit()
+
+            logger.info(f"Команда на годування відправлена для акваріума {aquarium_id}")
+            return {"status": "success", "message": "Команда на годування відправлена"}
         except Exception as e:
-            logger.error(f"Помилка при відправці команди пристрою {device.id}: {str(e)}")
-            return {"status": "error", "message": f"Помилка при відправці команди: {str(e)}"}
-
-        food_patch.quantity -= 1
-        self.db.commit()
-
-        logger.info(f"Годування виконано успішно для акваріума {aquarium_id}")
-        return {"status": "success", "message": "Годування виконано успішно"}
+            logger.error(f"Помилка при відправці команди на годування для акваріума {aquarium_id}: {str(e)}")
+            return {"status": "error", "message": f"Помилка при відправці команди на годування: {str(e)}"}
 
     async def auto_feed(self):
         current_time = datetime.now()
@@ -180,7 +217,54 @@ class DeviceFeedingService:
                 logger.warning(
                     f"Помилка при автоматичному годуванні для акваріума {schedule.aquarium_id}: {result['message']}")
             else:
-                logger.info(f"Автоматичне годування виконано успішно для акваріума {schedule.aquarium_id}")
+                logger.info(f"Команда на автоматичне годування відправлена для акваріума {schedule.aquarium_id}")
+
+            # Обновляем время последнего кормления независимо от результата
+            schedule.last_feed_time = current_time
+            self.db.commit()
+
+    async def handle_feed_result(self, device_id: str, success: bool):
+        device = self.db.query(IoTDevice).filter(IoTDevice.unique_address == device_id).first()
+        if not device:
+            logger.error(f"Пристрій {device_id} не знайдено")
+            return
+
+        if success:
+            logger.info(f"Годування успішно виконано пристроєм {device_id}")
+            # На майбутнє можливо додам логіку для оновлення стану прострою або запису результату годування
+        else:
+            logger.error(f"Помилка при годуванні пристроєм {device_id}")
+            # На майбутнє можливу додам логіку для обрабки помилок, наприклад, повернення корму в патч
+            food_patch = self.db.query(FoodPatch).filter(FoodPatch.iot_device_id == device.id).first()
+            if food_patch:
+                food_patch.quantity += 1
+                self.db.commit()
+                logger.info(f"Кількість корму повернуто для пристрою {device_id}")
+
+    def get_device_by_address(self, unique_address: str) -> IoTDevice:
+        device = self.db.query(IoTDevice).filter(IoTDevice.unique_address == unique_address).first()
+        if not device:
+            logger.error(f"Пристрій з адресою {unique_address} не знайдено")
+            raise ValueError(f"Пристрій з адресою {unique_address} не знайдено")
+        return device
+
+    async def save_water_parameters(self, water_params: WaterParameterCreate):
+        try:
+            water_param = WaterParameterCreate(
+                ph=water_params.ph,
+                temperature=water_params.temperature,
+                ammonia=water_params.ammonia,
+                nitrite=water_params.nitrite,
+                nitrate=water_params.nitrate,
+                aquarium_id=water_params.aquarium_id
+            )
+            self.db.add(water_param)
+            self.db.commit()
+            logger.info(f"Параметри води збережено для акваріума {water_params.aquarium_id}")
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Помилка при збереженні параметрів води для акваріума {water_params.aquarium_id}: {str(e)}")
+            raise
 
 
 def get_device_feeding_service(

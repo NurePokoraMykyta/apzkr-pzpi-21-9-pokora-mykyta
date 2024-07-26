@@ -21,15 +21,17 @@ def require_permissions(*required_permissions: str):
                 device_service: DeviceFeedingService = Depends(get_device_feeding_service),
                 **kwargs
         ):
-            device_id = kwargs.get('device_id')
+            aquarium_id = kwargs.get('aquarium_id')
+            if aquarium_id is None:
+                raise HTTPException(status_code=400, detail="Не вказано ID акваріума")
 
             try:
-                device = device_service.get_device(device_id)
-                company_id = device.aquarium.company_id
-            except ValueError:
-                raise HTTPException(status_code=404, detail="Пристрій не знайдено")
+                aquarium = device_service.get_aquarium(aquarium_id)
+                company_id = aquarium.company_id
+            except ValueError as e:
+                raise HTTPException(status_code=404, detail=str(e))
 
-            user_permissions = role_manager.get_user_permissions(current_user['uid'], company_id)
+            #user_permissions = role_manager.get_user_permissions(current_user['uid'], company_id)
 
             has_permission = role_manager.check_permissions(current_user['uid'], list(required_permissions), company_id)
 
@@ -44,72 +46,93 @@ def require_permissions(*required_permissions: str):
     return decorator
 
 
-@device_router.post("/devices", response_model=IoTDeviceResponse, summary="Встановлення нового пристрою")
+@device_router.post("/{aquarium_id}", response_model=IoTDeviceResponse, summary="Встановлення нового пристрою")
 @require_permissions("manage_devices")
 async def setup_device(
-        device_data: IoTDeviceCreate,
+        aquarium_id: int = Path(..., description="ID акваріума"),
+        device_data: IoTDeviceCreate = ...,
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+
 ):
     try:
-        new_device = device_service.setup_device(device_data)
+        new_device = device_service.setup_device(aquarium_id, device_data)
         return IoTDeviceResponse.from_orm(new_device)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@device_router.get("/{device_id}", response_model=IoTDeviceResponse, summary="Отримання інформації про пристрій")
+@device_router.get("/{aquarium_id}", response_model=IoTDeviceResponse, summary="Отримання інформації про пристрій")
 @require_permissions("view_devices")
 async def get_device(
-        device_id: int = Path(..., description="ID пристрою"),
+        aquarium_id: int = Path(..., description="ID акваріума"),
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+
 ):
     try:
-        device = device_service.get_device(device_id)
+        device = device_service.get_aquarium_device(aquarium_id)
         return IoTDeviceResponse.from_orm(device)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@device_router.put("/{device_id}", response_model=IoTDeviceResponse, summary="Оновлення інформації про пристрій")
+@device_router.put("/{aquarium_id}", response_model=IoTDeviceResponse, summary="Оновлення інформації про пристрій")
 @require_permissions("manage_devices")
 async def update_device(
-        device_id: int = Path(..., description="ID пристрою"),
+        aquarium_id: int = Path(..., description="ID акваріума"),
         device_data: IoTDeviceUpdate = ...,
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+
 ):
     try:
-        updated_device = device_service.update_device(device_id, device_data)
+        updated_device = device_service.update_device(aquarium_id, device_data)
         return IoTDeviceResponse.from_orm(updated_device)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@device_router.post("/{device_id}/activate", response_model=IoTDeviceResponse, summary="Активація пристрою")
+@device_router.post("/{aquarium_id}/activate", response_model=IoTDeviceResponse, summary="Активація пристрою")
 @require_permissions("manage_devices")
 async def activate_device(
-        device_id: int = Path(..., description="ID пристрою"),
+        aquarium_id: int = Path(..., description="ID акваріума"),
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+
 ):
     try:
-        activated_device = await device_service.activate_device(device_id)
+        device = device_service.get_aquarium_device(aquarium_id)
+        if not device:
+            raise HTTPException(status_code=404, detail="Пристрій не знайдено")
+        if device.is_active:
+            raise HTTPException(status_code=400, detail="Пристрій вже активовано")
+        activated_device = await device_service.activate_device(device.id)
         return IoTDeviceResponse.from_orm(activated_device)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@device_router.post("/{device_id}/deactivate", response_model=IoTDeviceResponse, summary="Деактивація пристрою")
+@device_router.post("/{aquarium_id}/deactivate", response_model=IoTDeviceResponse, summary="Деактивація пристрою")
 @require_permissions("manage_devices")
 async def deactivate_device(
-        device_id: int = Path(..., description="ID пристрою"),
+        aquarium_id: int = Path(..., description="ID акваріума"),
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+
 ):
     try:
-        deactivated_device = await device_service.deactivate_device(device_id)
+        device = device_service.get_aquarium_device(aquarium_id)
+        if not device:
+            raise HTTPException(status_code=404, detail="Пристрій не знайдено")
+        if not device.is_active:
+            raise HTTPException(status_code=400, detail="Пристрій вже деактивовано")
+        deactivated_device = await device_service.deactivate_device(device.id)
         return IoTDeviceResponse.from_orm(deactivated_device)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
