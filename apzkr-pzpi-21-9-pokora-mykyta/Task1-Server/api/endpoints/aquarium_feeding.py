@@ -51,7 +51,8 @@ async def create_feeding_schedule(
         aquarium_id: int = Path(..., description="ID акваріума"),
         schedule_data: FeedingScheduleCreate = ...,
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
 ):
     try:
         new_schedule = device_service.add_feeding_schedule(aquarium_id, schedule_data)
@@ -66,7 +67,8 @@ async def create_feeding_schedule(
 async def get_feeding_schedules(
         aquarium_id: int = Path(..., description="ID акваріума"),
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
 ):
     try:
         schedules = device_service.get_aquarium_feeding_schedules(aquarium_id)
@@ -80,7 +82,8 @@ async def get_feeding_schedules(
 async def feed_now(
         aquarium_id: int = Path(..., description="ID акваріума"),
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
 ):
     try:
         result = await device_service.feed_now(aquarium_id)

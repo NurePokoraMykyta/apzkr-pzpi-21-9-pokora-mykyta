@@ -47,7 +47,9 @@ def require_permissions(*required_permissions: str):
 async def get_feeding_schedule(
         schedule_id: int = Path(..., description="ID розкладу годування"),
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+
 ):
     try:
         schedule = device_service.get_feeding_schedule(schedule_id)
@@ -63,7 +65,9 @@ async def update_feeding_schedule(
         schedule_id: int = Path(..., description="ID розкладу годування"),
         schedule_data: FeedingScheduleUpdate = ...,
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+
 ):
     try:
         updated_schedule = device_service.update_feeding_schedule(schedule_id, schedule_data)
@@ -77,7 +81,9 @@ async def update_feeding_schedule(
 async def delete_feeding_schedule(
         schedule_id: int = Path(..., description="ID розкладу годування"),
         current_user: dict = Depends(get_current_user),
-        device_service: DeviceFeedingService = Depends(get_device_feeding_service)
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+
 ):
     try:
         device_service.delete_feeding_schedule(schedule_id)

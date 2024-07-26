@@ -120,16 +120,17 @@ class DeviceFeedingService:
         return device
 
     def add_feeding_schedule(self, aquarium_id, schedule_data: FeedingScheduleCreate) -> FeedingSchedule:
-        self.get_aquarium_device(schedule_data.aquarium_id)
+        self.get_aquarium_device(aquarium_id)
 
         new_schedule = FeedingSchedule(
             food_type=schedule_data.food_type,
             scheduled_time=schedule_data.scheduled_time,
+            aquarium_id=aquarium_id
         )
         self.db.add(new_schedule)
         self.db.commit()
         self.db.refresh(new_schedule)
-        logger.info(f"Додано новий розклад годування для акваріума {schedule_data.aquarium_id}")
+        logger.info(f"Додано новий розклад годування для акваріума {aquarium_id}")
         return new_schedule
 
     def get_aquarium_feeding_schedules(self, aquarium_id: int) -> List[FeedingSchedule]:
