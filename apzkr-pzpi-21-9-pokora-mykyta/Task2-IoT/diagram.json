@@ -1,54 +1,49 @@
 {
-    "version": 1,
-    "author": "Your Name",
-    "editor": "wokwi",
-    "parts": [
-      { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 33.5, "left": -110.6, "attrs": {} },
-      { "type": "wokwi-dht22", "id": "dht1", "top": -66.9, "left": 196.2, "attrs": {} },
-      { "type": "wokwi-ds18b20", "id": "ds1", "top": 150, "left": 250, "attrs": {} },
-      { "type": "wokwi-servo", "id": "servo1", "top": 353.2, "left": 115.2, "attrs": {} },
-      { "type": "wokwi-potentiometer", "id": "salinity", "top": 200.3, "left": -307.4, "attrs": {"value": "50"} },
-      {
-        "type": "wokwi-lcd1602",
-        "id": "lcd1",
-        "top": -137.6,
-        "left": -148,
-        "attrs": { "pins": "i2c" }
-      },
-      { "type": "wokwi-vcc", "id": "vcc1", "top": -37.64, "left": -345.6, "attrs": {} },
-      { "type": "wokwi-gnd", "id": "gnd1", "top": -86.4, "left": -346.2, "attrs": {} },
-      { "type": "wokwi-potentiometer", "id": "oxygen", "top": 334.7, "left": -307.4, "attrs": {"value": "21"} },
-      { "type": "wokwi-potentiometer", "id": "pH", "top": 46.7, "left": -307.4, "attrs": {"value": "6.8"} }
-    ],
-    "connections": [
-      [ "esp:TX0", "$serialMonitor:RX", "", [] ],
-      [ "esp:RX0", "$serialMonitor:TX", "", [] ],
-      [ "dht1:SDA", "esp:D15", "blue", [ "v0" ] ],
-      [ "lcd1:SDA", "esp:D21", "cyan", [ "h-28.8", "v105.8", "h268.8", "v67.2" ] ],
-      [ "lcd1:SCL", "esp:D22", "yellow", [ "h-48", "v105.9", "h268.8", "v0", "h0", "v28.8" ] ],
-      [ "dht1:VCC", "esp:3V3", "red", [ "v0" ] ],
-      [ "servo1:PWM", "esp:D2", "#8f4814", [ "h-28.8", "v-201.4" ] ],
-      [ "salinity:SIG", "esp:D13", "violet", [ "v38.4", "h76.4", "v-134.4" ] ],
-      [ "oxygen:SIG", "esp:D12", "green", [ "v38.4", "h-77.2", "v-277.7" ] ],
-      [ "pH:SIG", "esp:D14", "orange", [ "v0" ] ],
-      [ "esp:3V3", "oxygen:VCC", "red", [ "h28.5", "v249.6", "h-277.6" ] ],
-      [
-        "esp:3V3",
-        "salinity:VCC",
-        "red",
-        [ "v0", "h28.5", "v249.6", "h-240", "v-153.6", "h-38.4" ]
-      ],
-      [ "esp:3V3", "pH:VCC", "red", [ "h28.5", "v249.6", "h-240", "v-297.6", "h-37.6" ] ],
-      [ "pH:GND", "esp:GND.2", "black", [ "v28.8", "h-86.4", "v307.2", "h201.6", "v-268.8" ] ],
-      [ "salinity:GND", "esp:GND.2", "black", [ "v28.8", "h-86.4", "v153.6", "h201.6", "v-268.8" ] ],
-      [ "oxygen:GND", "esp:GND.2", "black", [ "v9.6", "h-86.4", "v38.4", "h201.6", "v-268.8" ] ],
-      [ "esp:GND.1", "dht1:GND", "black", [ "h249.3", "v-134.5" ] ],
-      [ "esp:GND.2", "servo1:GND", "black", [ "h-57.6", "v211.1" ] ],
-      [ "gnd1:GND", "lcd1:GND", "black", [ "v0" ] ],
-      [ "lcd1:GND", "esp:GND.2", "black", [ "h-220.8", "v556.8", "h201.6", "v-268.8" ] ],
-      [ "vcc1:VCC", "esp:VIN", "purple", [ "v9.6", "h124.8", "v201.6" ] ],
-      [ "vcc1:VCC", "servo1:V+", "purple", [ "v9.6", "h124.8", "v278.4", "h144", "v134.4" ] ],
-      [ "lcd1:VCC", "vcc1:VCC", "purple", [ "h-67.2", "v96.1", "h-124.8" ] ]
-    ],
-    "dependencies": {}
-  }
+  "version": 1,
+  "author": "Ejected clown",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": -24.1, "left": 187, "attrs": {} },
+    { "type": "wokwi-vcc", "id": "vcc1", "top": -268.04, "left": -38.4, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd1", "top": 220.8, "left": 153, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": -164.5, "left": -115.4, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot2", "top": -20.5, "left": -115.4, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot3", "top": 123.5, "left": -115.4, "attrs": {} },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -252.8,
+      "left": 53.6,
+      "attrs": { "pins": "i2c" }
+    },
+    { "type": "wokwi-dht22", "id": "dht1", "top": -249.3, "left": 397.8, "attrs": {} },
+    { "type": "wokwi-servo", "id": "servo1", "top": 142, "left": 345.6, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "pot1:VCC", "esp:5V", "red", [ "v0" ] ],
+    [ "pot1:VCC", "esp:3V3", "red", [ "v28.8", "h412", "v192" ] ],
+    [ "pot1:GND", "esp:GND.2", "black", [ "v28.8", "h-57.6", "v172.8", "h268.8", "v19.3" ] ],
+    [ "esp:GND.2", "pot2:GND", "black", [ "h-67.2", "v-19.3", "h-211.2" ] ],
+    [ "esp:GND.2", "pot3:GND", "black", [ "h-67.2", "v-19.3", "h-268.8", "v125", "h57.6" ] ],
+    [ "lcd1:SCL", "esp:D22", "yellow", [ "h-19.2", "v86.7", "h268.8", "v105.9" ] ],
+    [ "lcd1:SDA", "esp:D21", "cyan", [ "h-38.4", "v115.4", "h307.2", "v125.2" ] ],
+    [ "lcd1:GND", "esp:GND.1", "black", [ "h-28.8", "v-48", "h451.2", "v393.7" ] ],
+    [ "pot2:VCC", "esp:3V3", "red", [ "v19.2", "h85.6", "v-134.4", "h326.4", "v201.6" ] ],
+    [ "pot3:VCC", "esp:3V3", "red", [ "v19.2", "h85.6", "v-278.4", "h326.4", "v192" ] ],
+    [ "lcd1:VCC", "esp:VIN", "orange", [ "h-230.4", "v460.9", "h288", "v-124.8" ] ],
+    [ "dht1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "dht1:SDA", "esp:D15", "blue", [ "v0" ] ],
+    [ "dht1:GND", "esp:GND.1", "black", [ "v259.2", "h-153.3" ] ],
+    [ "servo1:GND", "esp:GND.1", "black", [ "h-19.2", "v-67.2", "h-28.8", "v0.1" ] ],
+    [ "servo1:V+", "esp:VIN", "orange", [ "h-230.4", "v-76.7" ] ],
+    [ "servo1:PWM", "esp:D2", "violet", [ "h-38.4", "v-115" ] ],
+    [ "pot1:SIG", "esp:D34", "green", [ "v48", "h162.8", "v77" ] ],
+    [ "pot2:SIG", "esp:D35", "green", [ "v38.4", "h134", "v-47.6" ] ],
+    [ "esp:D32", "pot3:SIG", "green", [ "h-105.6", "v182.3", "h-162.8" ] ],
+    [ "vcc1:VCC", "esp:VIN", "orange", [ "v28.8", "h-144", "v460.8", "h288", "v-115.2" ] ],
+    [ "esp:GND.1", "gnd1:GND", "black", [ "h38.1", "v67.1", "h-115.2" ] ]
+  ],
+  "dependencies": {}
+}

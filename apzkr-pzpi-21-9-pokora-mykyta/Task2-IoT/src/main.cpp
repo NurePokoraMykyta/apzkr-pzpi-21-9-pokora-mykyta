@@ -44,9 +44,9 @@ void setup() {
   lcd.backlight();
 
   pinMode(SERVO_PIN, OUTPUT);
-  pinMode(PH_PIN, INPUT);
-  pinMode(SALINITY_PIN, INPUT);
-  pinMode(OXYGEN_PIN, INPUT);
+  pinMode(34, INPUT);
+  pinMode(32, INPUT);
+  pinMode(35, INPUT);
 
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -125,9 +125,9 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 void sendSensorData() {
   if (!is_active) return;
 
-  float rawPH = analogRead(PH_PIN);
-  float rawSalinity = analogRead(SALINITY_PIN);
-  float rawOxygen = analogRead(OXYGEN_PIN);
+  float rawPH = analogRead(34);
+  float rawSalinity = analogRead(32);
+  float rawOxygen = analogRead(35);
   float rawTemperature = dht.readTemperature();
 
   JsonDocument doc;
