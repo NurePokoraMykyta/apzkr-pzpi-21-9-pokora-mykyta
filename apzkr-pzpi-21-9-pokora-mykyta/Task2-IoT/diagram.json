@@ -1,0 +1,54 @@
+{
+    "version": 1,
+    "author": "Your Name",
+    "editor": "wokwi",
+    "parts": [
+      { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 33.5, "left": -110.6, "attrs": {} },
+      { "type": "wokwi-dht22", "id": "dht1", "top": -66.9, "left": 196.2, "attrs": {} },
+      { "type": "wokwi-ds18b20", "id": "ds1", "top": 150, "left": 250, "attrs": {} },
+      { "type": "wokwi-servo", "id": "servo1", "top": 353.2, "left": 115.2, "attrs": {} },
+      { "type": "wokwi-potentiometer", "id": "salinity", "top": 200.3, "left": -307.4, "attrs": {"value": "50"} },
+      {
+        "type": "wokwi-lcd1602",
+        "id": "lcd1",
+        "top": -137.6,
+        "left": -148,
+        "attrs": { "pins": "i2c" }
+      },
+      { "type": "wokwi-vcc", "id": "vcc1", "top": -37.64, "left": -345.6, "attrs": {} },
+      { "type": "wokwi-gnd", "id": "gnd1", "top": -86.4, "left": -346.2, "attrs": {} },
+      { "type": "wokwi-potentiometer", "id": "oxygen", "top": 334.7, "left": -307.4, "attrs": {"value": "21"} },
+      { "type": "wokwi-potentiometer", "id": "pH", "top": 46.7, "left": -307.4, "attrs": {"value": "6.8"} }
+    ],
+    "connections": [
+      [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+      [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+      [ "dht1:SDA", "esp:D15", "blue", [ "v0" ] ],
+      [ "lcd1:SDA", "esp:D21", "cyan", [ "h-28.8", "v105.8", "h268.8", "v67.2" ] ],
+      [ "lcd1:SCL", "esp:D22", "yellow", [ "h-48", "v105.9", "h268.8", "v0", "h0", "v28.8" ] ],
+      [ "dht1:VCC", "esp:3V3", "red", [ "v0" ] ],
+      [ "servo1:PWM", "esp:D2", "#8f4814", [ "h-28.8", "v-201.4" ] ],
+      [ "salinity:SIG", "esp:D13", "violet", [ "v38.4", "h76.4", "v-134.4" ] ],
+      [ "oxygen:SIG", "esp:D12", "green", [ "v38.4", "h-77.2", "v-277.7" ] ],
+      [ "pH:SIG", "esp:D14", "orange", [ "v0" ] ],
+      [ "esp:3V3", "oxygen:VCC", "red", [ "h28.5", "v249.6", "h-277.6" ] ],
+      [
+        "esp:3V3",
+        "salinity:VCC",
+        "red",
+        [ "v0", "h28.5", "v249.6", "h-240", "v-153.6", "h-38.4" ]
+      ],
+      [ "esp:3V3", "pH:VCC", "red", [ "h28.5", "v249.6", "h-240", "v-297.6", "h-37.6" ] ],
+      [ "pH:GND", "esp:GND.2", "black", [ "v28.8", "h-86.4", "v307.2", "h201.6", "v-268.8" ] ],
+      [ "salinity:GND", "esp:GND.2", "black", [ "v28.8", "h-86.4", "v153.6", "h201.6", "v-268.8" ] ],
+      [ "oxygen:GND", "esp:GND.2", "black", [ "v9.6", "h-86.4", "v38.4", "h201.6", "v-268.8" ] ],
+      [ "esp:GND.1", "dht1:GND", "black", [ "h249.3", "v-134.5" ] ],
+      [ "esp:GND.2", "servo1:GND", "black", [ "h-57.6", "v211.1" ] ],
+      [ "gnd1:GND", "lcd1:GND", "black", [ "v0" ] ],
+      [ "lcd1:GND", "esp:GND.2", "black", [ "h-220.8", "v556.8", "h201.6", "v-268.8" ] ],
+      [ "vcc1:VCC", "esp:VIN", "purple", [ "v9.6", "h124.8", "v201.6" ] ],
+      [ "vcc1:VCC", "servo1:V+", "purple", [ "v9.6", "h124.8", "v278.4", "h144", "v134.4" ] ],
+      [ "lcd1:VCC", "vcc1:VCC", "purple", [ "h-67.2", "v96.1", "h-124.8" ] ]
+    ],
+    "dependencies": {}
+  }

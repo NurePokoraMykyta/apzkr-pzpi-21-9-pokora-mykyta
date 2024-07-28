@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from datetime import datetime, timedelta
 
-from data import db_session
+from data import db_session, WaterParameter
 from data.models import IoTDevice, FoodPatch, FeedingSchedule, Aquarium
 from typing import List
 
@@ -94,13 +94,19 @@ class DeviceFeedingService:
             raise ValueError(f"IoT пристрій з id {device_id} не знайдено")
 
         try:
-            await self.connection_manager.send_command(device.unique_address, {"action": "activate"})
-            device.is_active = True
-            self.db.commit()
-            logger.info(f"Пристрій {device_id} успішно активовано")
+            if device.unique_address in self.connection_manager.active_connections:
+                await self.connection_manager.send_command(device.unique_address, {"action": "activate"})
+                device.is_active = True
+                self.db.commit()
+                logger.info(f"Пристрій {device_id} успішно активовано")
+            else:
+                logger.warning(f"Пристрій {device.unique_address} не підключений. Активація тільки в базі даних.")
+                device.is_active = True
+                self.db.commit()
         except Exception as e:
             logger.error(f"Помилка при активації пристрою {device_id}: {str(e)}")
             raise ValueError(f"Помилка при активації пристрою: {str(e)}")
+
         return device
 
     async def deactivate_device(self, device_id: int) -> IoTDevice:
@@ -110,10 +116,15 @@ class DeviceFeedingService:
             raise ValueError(f"IoT пристрій з id {device_id} не знайдено")
 
         try:
-            await self.connection_manager.send_command(device.unique_address, {"action": "deactivate"})
-            device.is_active = False
-            self.db.commit()
-            logger.info(f"Пристрій {device_id} успішно деактивовано")
+            if device.unique_address in self.connection_manager.active_connections:
+                await self.connection_manager.send_command(device.unique_address, {"action": "deactivate"})
+                device.is_active = False
+                self.db.commit()
+                logger.info(f"Пристрій {device_id} успішно деактивовано")
+            else:
+                logger.warning(f"Пристрій {device.unique_address} не підключений. Деактивація тільки в базі даних.")
+                device.is_active = False
+                self.db.commit()
         except Exception as e:
             logger.error(f"Помилка при деактивації пристрою {device_id}: {str(e)}")
             raise ValueError(f"Помилка при деактивації пристрою: {str(e)}")
@@ -249,22 +260,22 @@ class DeviceFeedingService:
             raise ValueError(f"Пристрій з адресою {unique_address} не знайдено")
         return device
 
-    async def save_water_parameters(self, water_params: WaterParameterCreate):
+    async def save_water_parameters(self, aquarium_id: int, params: dict):
         try:
-            water_param = WaterParameterCreate(
-                ph=water_params.ph,
-                temperature=water_params.temperature,
-                ammonia=water_params.ammonia,
-                nitrite=water_params.nitrite,
-                nitrate=water_params.nitrate,
-                aquarium_id=water_params.aquarium_id
+            water_params = WaterParameterCreate(
+                ph=params['ph'],
+                temperature=params['temperature'],
+                salinity=params['salinity'],
+                oxygen_level=params['oxygen_level'],
+                aquarium_id=aquarium_id
             )
+            water_param = WaterParameter(**water_params.dict())
             self.db.add(water_param)
             self.db.commit()
-            logger.info(f"Параметри води збережено для акваріума {water_params.aquarium_id}")
+            logger.info(f"Параметри води збережено для акваріума {aquarium_id}")
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Помилка при збереженні параметрів води для акваріума {water_params.aquarium_id}: {str(e)}")
+            logger.error(f"Помилка при збереженні параметрів води для акваріума {aquarium_id}: {str(e)}")
             raise
 
 

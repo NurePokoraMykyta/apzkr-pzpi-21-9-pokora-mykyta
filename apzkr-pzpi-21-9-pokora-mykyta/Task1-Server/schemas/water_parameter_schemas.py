@@ -8,7 +8,7 @@ class WaterParameterBase(BaseModel):
     temperature: float = Field(..., description="Температура води")
     salinity: float = Field(..., description="Рівень солоності")
     oxygen_level: float = Field(..., description="Рівень кисню")
-    measured_at: datetime = Field(..., description="Час вимірювання")
+    measured_at: datetime = Field(default_factory=datetime.now, description="Час вимірювання")
 
 
 class WaterParameterCreate(WaterParameterBase):
@@ -20,7 +20,7 @@ class WaterParameterUpdate(BaseModel):
     temperature: Optional[float] = Field(None, description="Температура води")
     salinity: Optional[float] = Field(None, description="Рівень солоності")
     oxygen_level: Optional[float] = Field(None, description="Рівень кисню")
-    measured_at: Optional[datetime] = Field(None, description="Час вимірювання")
+    measured_at: datetime = Field(default_factory=datetime.now, description="Час вимірювання")
 
 
 class WaterParameterResponse(WaterParameterBase):

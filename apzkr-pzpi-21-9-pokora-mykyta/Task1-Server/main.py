@@ -1,5 +1,6 @@
 import os
 
+import uvicorn
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -92,3 +93,6 @@ scheduler.add_job(
     id='auto_feed_job',
     replace_existing=True
 )
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
