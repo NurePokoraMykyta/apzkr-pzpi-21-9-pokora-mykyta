@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "author": "Your Name",
+    "author": "pokora_mykyta",
     "editor": "wokwi",
     "parts": [
       { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 33.5, "left": -110.6, "attrs": {} },
