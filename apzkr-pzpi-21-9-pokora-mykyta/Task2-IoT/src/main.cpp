@@ -65,8 +65,17 @@ void setup() {
 
 void loop() {
   webSocket.loop();
-
-  if (is_active) {
+  
+  static unsigned long lastConnectionCheck = 0;
+  if (millis() - lastConnectionCheck > 5000) {
+    lastConnectionCheck = millis();
+    if (!is_connected) {
+      Serial.println("Спроба повторного підключення...");
+      webSocket.begin(websockets_server, websockets_port, websockets_route);
+    }
+  }
+  
+  if (is_active && is_connected) {
     static unsigned long lastTime = 0;
     unsigned long now = millis();
     if (now - lastTime > 600) {
@@ -137,7 +146,6 @@ void sendSensorData() {
   doc["parameters"]["temperature"] = rawTemperature;
   doc["parameters"]["salinity"] = rawSalinity;
   doc["parameters"]["oxygen_level"] = rawOxygen;
-  doc["parameters"]["measured_at"] = String(millis());
 
   String jsonString;
   serializeJson(doc, jsonString);

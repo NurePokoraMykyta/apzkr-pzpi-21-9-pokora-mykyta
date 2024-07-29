@@ -1,18 +1,23 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from typing import Dict
+import asyncio
 
 
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
+        self.device_statuses: Dict[str, bool] = {}
+        self.lock = asyncio.Lock()
 
     async def connect(self, websocket: WebSocket, unique_address: str):
         await websocket.accept()
-        self.active_connections[unique_address] = websocket
+        async with self.lock:
+            self.active_connections[unique_address] = websocket
         print(f"Пристрій {unique_address} підключився")
 
-    def disconnect(self, unique_address: str):
-        self.active_connections.pop(unique_address, None)
+    async def disconnect(self, unique_address: str):
+        async with self.lock:
+            self.active_connections.pop(unique_address, None)
         print(f"Пристрій {unique_address} відключився")
 
     async def send_command(self, unique_address: str, message: dict):

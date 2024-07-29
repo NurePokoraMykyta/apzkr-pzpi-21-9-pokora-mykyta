@@ -5,7 +5,7 @@ from sqlalchemy_utils import database_exists, create_database
 from core.config import settings
 
 connection_string = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_SERVER}/{settings.DB_NAME}"
-db_engine = create_engine(connection_string)
+db_engine = create_engine(connection_string, echo=True)
 
 if not database_exists(db_engine.url):
     create_database(db_engine.url)
