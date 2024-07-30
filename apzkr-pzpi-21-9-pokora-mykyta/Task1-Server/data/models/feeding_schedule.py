@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Time, ForeignKey
 from sqlalchemy.orm import relationship
 from data.session import Base
 
@@ -8,7 +8,7 @@ class FeedingSchedule(Base):
 
     id = Column(Integer, primary_key=True)
     food_type = Column(String, nullable=False)
-    scheduled_time = Column(DateTime, nullable=False)
+    scheduled_time = Column(Time, nullable=False)
     aquarium_id = Column(Integer, ForeignKey('aquariums.id'), nullable=False)
 
     aquarium = relationship("Aquarium", back_populates="feeding_schedules")

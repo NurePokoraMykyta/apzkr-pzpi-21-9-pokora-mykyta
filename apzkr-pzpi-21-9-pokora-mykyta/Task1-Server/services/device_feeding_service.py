@@ -11,6 +11,7 @@ from schemas.feeding_schemas import FeedingScheduleCreate, FeedingScheduleUpdate
 
 import logging
 
+from schemas.food_patch_schemas import FoodPatchCreate
 from schemas.water_parameter_schemas import WaterParameterCreate
 from services.connection_manager import ConnectionManager
 from fastapi import Depends
@@ -194,12 +195,11 @@ class DeviceFeedingService:
         if not device.is_active:
             return {"status": "error", "message": "Пристрій деактивовано"}
 
-        food_patch = self.db.query(FoodPatch).filter(FoodPatch.iot_device_id == device.id).first()
+        food_patch = self.db.query(FoodPatch).filter(
+            FoodPatch.iot_device_id == device.id, FoodPatch.quantity > 0
+        ).first()
         if not food_patch:
-            return {"status": "error", "message": "Порцію корму не знайдено"}
-
-        if food_patch.quantity <= 0:
-            return {"status": "error", "message": "Корм закінчився"}
+            return {"status": "error", "message": "Порцію корму не знайдено або він закінчився"}
 
         try:
             await self.send_feed_command(device.unique_address, food_patch.food_type, 1)
@@ -213,8 +213,8 @@ class DeviceFeedingService:
             return {"status": "error", "message": f"Помилка при відправці команди на годування: {str(e)}"}
 
     async def auto_feed(self):
-        current_time = datetime.now()
-        one_minute_ago = current_time - timedelta(minutes=1)
+        current_time = datetime.now().time()
+        one_minute_ago = (datetime.now() - timedelta(minutes=1)).time()
         schedules = self.db.query(FeedingSchedule).filter(
             and_(
                 FeedingSchedule.scheduled_time >= one_minute_ago,
@@ -231,7 +231,7 @@ class DeviceFeedingService:
                 logger.info(f"Команда на автоматичне годування відправлена для акваріума {schedule.aquarium_id}")
 
             # Обновляем время последнего кормления независимо от результата
-            schedule.last_feed_time = current_time
+            schedule.last_feed_time = datetime.now().time()
             self.db.commit()
 
     async def handle_feed_result(self, device_id: str, success: bool):
@@ -274,6 +274,35 @@ class DeviceFeedingService:
             self.db.rollback()
             logger.error(f"Помилка при збереженні параметрів води для акваріума {aquarium_id}: {str(e)}")
             raise
+
+    def fill_food_patch(self, aquarium_id: int, food_patch_data: FoodPatchCreate) -> FoodPatch:
+        device = self.get_aquarium_device(aquarium_id)
+        if not device:
+            raise ValueError(f"Пристрій для акваріума з id {aquarium_id} не встановлено")
+
+        food_patch = FoodPatch(**food_patch_data.dict(), iot_device_id=device.id)
+
+        self.db.add(food_patch)
+        self.db.commit()
+        self.db.refresh(food_patch)
+        logger.info(f"FoodPatch для акваріума {aquarium_id} успішно створено/оновлено")
+        return food_patch
+
+    def get_food_patch(self, aquarium_id: int) -> FoodPatch:
+        device = self.get_aquarium_device(aquarium_id)
+        if not device:
+            raise ValueError(f"Пристрій для акваріума з id {aquarium_id} не встановлено")
+
+        food_patch = self.db.query(FoodPatch).filter(FoodPatch.iot_device_id == device.id).first()
+        if not food_patch:
+            raise ValueError(f"Порція для акваріума з id {aquarium_id} не знайдена")
+        return food_patch
+
+    def delete_food_patch(self, aquarium_id: int):
+        food_patch = self.get_food_patch(aquarium_id)
+        self.db.delete(food_patch)
+        self.db.commit()
+        logger.info(f"Порція для акваріума {aquarium_id} успішно видалена")
 
 
 def get_device_feeding_service(

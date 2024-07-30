@@ -46,6 +46,7 @@ async def websocket_endpoint(
             else:
                 logger.warning(f"Невідома дія від пристрою {unique_address}: {data['action']}")
     except WebSocketDisconnect:
+        pass
         await handle_disconnect(unique_address, connection_manager)
     except Exception as e:
         logger.exception(f"Помилка при обробці WebSocket для пристрою {unique_address}: {str(e)}")

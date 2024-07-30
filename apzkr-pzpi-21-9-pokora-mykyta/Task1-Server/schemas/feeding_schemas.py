@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
-from datetime import datetime
+from typing import Optional
+from datetime import time
 
 
 class FeedingScheduleBase(BaseModel):
     food_type: str = Field(..., description="Тип корму")
-    scheduled_time: datetime = Field(..., description="Запланований час годування")
+    scheduled_time: time = Field(..., description="Запланований час годування")
 
 
 class FeedingScheduleCreate(FeedingScheduleBase):
@@ -14,7 +14,7 @@ class FeedingScheduleCreate(FeedingScheduleBase):
 
 class FeedingScheduleUpdate(BaseModel):
     food_type: Optional[str] = Field(None, description="Тип корму")
-    scheduled_time: Optional[datetime] = Field(None, description="Запланований час годування")
+    scheduled_time: Optional[time] = Field(None, description="Запланований час годування")
 
 
 class FeedingScheduleResponse(FeedingScheduleBase):
