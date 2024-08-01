@@ -1,0 +1,36 @@
+{
+  "company": "Company",
+  "login": "Login",
+  "logout": "Logout",
+  "email": "Email",
+  "password": "Password",
+  "noAccount": "Don't have an account? Sign up",
+  "register": "Sign up",
+  "haveAccount": "Already have an account? Log in",
+  "displayName": "Display Name",
+  "aquariums": "Aquariums",
+  "devices": "Devices",
+  "feeders": "Feeders",
+  "blog": "Blog",
+  "support": "Support",
+
+  "aboutUs": "About Us",
+  "aboutCompany": "About Company",
+  "contacts": "Contacts",
+  "warranty": "Warranty",
+  "partners": "Partners",
+  "products": "Products",
+  "accessories": "Accessories",
+  "subscribeToNews": "Subscribe to News",
+  "subscribe": "Subscribe",
+
+  "excellentCustomerService": "Excellent Customer Service",
+  "excellentCustomerServiceDesc": "Our team of experts is always ready to help you with any questions about your aquarium.",
+  "perfectAquariumSelection": "Perfect Aquarium Selection",
+  "perfectAquariumSelectionDesc": "We will help you choose the best aquarium and equipment for your company or home.",
+  "qualityGuarantee": "Quality Guarantee",
+  "qualityGuaranteeDesc": "We provide a 2-year warranty on all our equipment for complete peace of mind for our customers.",
+
+  "latestAwards": "Latest Awards",
+  "mentionsInMedia": "Mentions in Media"
+}

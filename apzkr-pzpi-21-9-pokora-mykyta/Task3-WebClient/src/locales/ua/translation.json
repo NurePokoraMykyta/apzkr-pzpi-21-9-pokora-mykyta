@@ -1,0 +1,37 @@
+{
+  "company": "Компанія",
+  "login": "Увійти",
+  "logout": "Вийти",
+  "email": "Електронна пошта",
+  "password": "Пароль",
+  "noAccount": "Немає акаунту? Зареєструватися",
+  "register": "Зареєструватися",
+  "haveAccount": "Вже є акаунт? Увійти",
+  "displayName": "Ім'я для відображення",
+  "aquariums": "Акваріуми",
+  "devices": "Пристрої",
+  "feeders": "Годівниці",
+  "blog": "Блог",
+  "support": "Підтримка",
+  "IoT": "Обладнання",
+
+  "aboutUs": "Про нас",
+  "aboutCompany": "Про компанію",
+  "contacts": "Контакти",
+  "warranty": "Гарантія",
+  "partners": "Партнери",
+  "products": "Продукти",
+  "accessories": "Аксесуари",
+  "subscribeToNews": "Підписка на новини",
+  "subscribe": "Підписатися",
+
+  "excellentCustomerService": "Відмінне обслуговування клієнтів",
+  "excellentCustomerServiceDesc": "Наша команда експертів завжди готова допомогти вам з будь-якими питаннями щодо вашого акваріума.",
+  "perfectAquariumSelection": "Підбір ідеального акваріума",
+  "perfectAquariumSelectionDesc": "Ми допоможемо вам вибрати найкращий акваріум та обладнання для вашої компанії чи дому.",
+  "qualityGuarantee": "Гарантія якості",
+  "qualityGuaranteeDesc": "Ми надаємо 2 роки гарантії на все наше обладнання для повного спокою наших клієнтів.",
+
+  "latestAwards": "Останні нагороди",
+  "mentionsInMedia": "Згадки у ЗМІ"
+}
