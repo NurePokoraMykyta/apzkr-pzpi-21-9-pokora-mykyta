@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Button, Box, Typography, Menu, MenuItem } from '@mui/material';
+import {
+    AppBar,
+    Toolbar,
+    Button,
+    Box,
+    Typography,
+    Menu,
+    MenuItem,
+    Snackbar,
+    Alert,
+    CircularProgress
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import UaFlag from '../ua.png';
@@ -45,7 +56,7 @@ const Header = () => {
     const [isTopVisible, setIsTopVisible] = useState(true);
     const [isOpen, setOpen] = useState(null);
     const { t, i18n } = useTranslation();
-    const { user, logout } = useAuth();
+    const { user,  logout, successMessage, setSuccessMessage } = useAuth();
     const [loginModalOpen, setLoginModalOpen] = useState(false);
     const [registerModalOpen, setRegisterModalOpen] = useState(false);
 
@@ -60,6 +71,7 @@ const Header = () => {
     const handleLogout = async () => {
         await logout();
     };
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -152,6 +164,16 @@ const Header = () => {
                     setLoginModalOpen(true);
                 }}
             />
+            <Snackbar
+                open={!!successMessage}
+                autoHideDuration={6000}
+                onClose={() => setSuccessMessage(null)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={() => setSuccessMessage(null)} severity="success" sx={{ width: '100%' }}>
+                    {successMessage}
+                </Alert>
+            </Snackbar>
         </>
     );
 };

@@ -24,8 +24,8 @@ export const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await login(email, password);
-        if (!error) onClose();
+        const success = await login(email, password);
+        if (success) onClose();
     };
 
     return (
@@ -45,7 +45,11 @@ export const LoginModal = ({ open, onClose, onSwitchToRegister }) => {
                 <Typography variant="h6" component="h2" gutterBottom>
                     {t('login')}
                 </Typography>
-                {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+                {error && typeof error === 'string' && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Alert>
+                )}
                 <form onSubmit={handleSubmit}>
                     <TextField
                         fullWidth
@@ -98,8 +102,8 @@ export const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await register(email, password, displayName);
-        if (!error) onClose();
+        const success = await register(email, password, displayName);
+        if (success) onClose();
     };
 
     return (
