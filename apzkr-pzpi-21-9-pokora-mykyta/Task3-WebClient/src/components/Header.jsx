@@ -17,6 +17,9 @@ import UaFlag from '../ua.png';
 import EnFlag from '../en.png';
 import { useAuth } from '../contexts/AuthContext';
 import {LoginModal, RegisterModal} from "./AuthModals";
+import {routes} from "../routes";
+import {NavLink, Link} from "react-router-dom";
+import CompanyButton from "./CompanyButton";
 
 const StyledToolbar = styled(Toolbar)({
     display: 'flex',
@@ -36,11 +39,20 @@ const NavContainer = styled(Box)(({ theme }) => ({
     zIndex: theme.zIndex.appBar,
 }));
 
-const NavButton = styled(Button)(({ theme }) => ({
+const StyledNavLink = styled(NavLink)(({ theme }) => ({
+    textDecoration: 'none',
     color: theme.palette.text.primary,
+    padding: '6px 16px',
+    borderRadius: '4px',
     '&:hover': {
-        backgroundColor: 'transparent',
-        color: theme.palette.primary.main,
+        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    },
+    '&.active': {
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.common.white,
+        '&:hover': {
+            backgroundColor: theme.palette.primary.dark,
+        },
     },
 }));
 
@@ -51,7 +63,6 @@ const FlagIcon = styled('img')({
     objectFit: 'cover',
     cursor: 'pointer',
 });
-
 const Header = () => {
     const [isTopVisible, setIsTopVisible] = useState(true);
     const [isOpen, setOpen] = useState(null);
@@ -109,11 +120,25 @@ const Header = () => {
                     <Typography variant="h6" component="div" sx={{ visibility: 'hidden' }}>
                         FinFare
                     </Typography>
-                    <Typography variant="h6" component="div" sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+                    <Typography
+                        variant="h6"
+                        component={Link}
+                        to="/"
+                        sx={{
+                            position: 'absolute',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            textDecoration: 'none',
+                            color: 'inherit',
+                            '&:hover': {
+                                textDecoration: 'none',
+                            },
+                        }}
+                    >
                         FinFare
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Button variant="contained" color="primary" sx={{ mr: 2 }}>{t('company')}</Button>
+                        <CompanyButton />
                         {user ? (
                             <Button variant="outlined" color="primary" onClick={handleLogout} sx={{ mr: 2 }}>{t('logout')}</Button>
                         ) : (
@@ -141,13 +166,18 @@ const Header = () => {
                     </Box>
                 </StyledToolbar>
             </AppBar>
-            <NavContainer>
-                <NavButton color="inherit">{t('aquariums')}</NavButton>
-                <NavButton color="inherit">{t('devices')}</NavButton>
-                <NavButton color="inherit">{t('feeders')}</NavButton>
-                <NavButton color="inherit">{t('blog')}</NavButton>
-                <NavButton color="inherit">{t('support')}</NavButton>
-            </NavContainer>
+            {user && (
+                <NavContainer>
+                    {routes.map((route) => (
+                        <StyledNavLink
+                            key={route.path}
+                            to={route.path}
+                        >
+                            {t(route.name)}
+                        </StyledNavLink>
+                    ))}
+                </NavContainer>
+            )}
             <LoginModal
                 open={loginModalOpen}
                 onClose={() => setLoginModalOpen(false)}

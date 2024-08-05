@@ -12,7 +12,7 @@
   "devices": "Пристрої",
   "feeders": "Годівниці",
   "blog": "Блог",
-  "support": "Підтримка",
+  "profile": "Профіль",
   "IoT": "Обладнання",
 
   "aboutUs": "Про нас",
@@ -35,5 +35,28 @@
   "latestAwards": "Останні нагороди",
   "mentionsInMedia": "Згадки у ЗМІ",
 
-  "registrationSuccess": "Ви успішно зареєструвалися!"
+  "registrationSuccess": "Ви успішно зареєструвалися!",
+
+  "aquariumName": "Назва акваріума",
+  "capacity": "Об'єм",
+  "liters": "Літрів",
+  "description": "Опис",
+  "update": "Оновити",
+  "create": "Створити",
+  "noFishInAquarium": "У цьому акваріумі немає риб",
+  "feedNow": "Погодувати зараз",
+  "addFish": "Додати рибу",
+  "edit": "Редагувати",
+  "delete": "Видалити",
+  "fish": "Риба",
+  "quantity": "Кількість",
+  "noCompanySelected": "Компанію не вибрано",
+  "pleaseSelectCompanyHeader": "Щоб отримати доступ до цієї функції, виберіть компанію за допомогою кнопки компанії у заголовку.",
+  "companySelectionHelp": "Допомога у виборі компанії",
+  "useCompanyButtonToSelect": "Використовуйте кнопку компанії у заголовку, щоб вибрати компанію.",
+  "createCompany": "Створити компанію",
+  "companyName": "Назва компанії",
+  "createCompanySuccess": "Компанію успішно створено",
+  "myCompanies": "Мої компанії",
+  "createAquarium": "Створити акваріум"
 }

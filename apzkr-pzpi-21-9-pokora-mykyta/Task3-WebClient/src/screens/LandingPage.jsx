@@ -10,14 +10,13 @@ import theme from "../theme";
 
 const LandingPage = () => {
     return (
-        <ThemeProvider theme={theme}>
+        <>
             <CssBaseline />
-            <Header />
             <Hero />
             <Features />
             <Awards />
             <Footer />
-        </ThemeProvider>
+        </>
     );
 };
 

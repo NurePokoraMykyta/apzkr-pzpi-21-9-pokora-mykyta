@@ -43,4 +43,25 @@ export const authApi = {
     logout: () => api.post('/auth/logout'),
 };
 
+export const companyApi = {
+    createCompany: (companyData) => api.post('/companies', companyData),
+    getUserCompanies: () => api.get('/companies'),
+    getCompany: (id) => api.get(`/companies/${id}`),
+    updateCompany: (id, companyData) => api.put(`/companies/${id}`, companyData),
+    deleteCompany: (id) => api.delete(`/companies/${id}`),
+    addUserToCompany: (companyId, email, roleId) =>
+        api.post(`/companies/${companyId}/users`, null, { params: { email, role_id: roleId } }),
+    removeUserFromCompany: (companyId, email) =>
+        api.delete(`/companies/${companyId}/users/${email}`),
+    getCompanyAquariums: (companyId) => api.get(`/companies/${companyId}/aquariums`),
+    createAquarium: (companyId, aquariumData) => api.post(`/companies/${companyId}/aquariums`, aquariumData),
+    updateAquarium: (companyId, aquariumId, aquariumData) => api.put(`/companies/${companyId}/aquariums/${aquariumId}`, aquariumData),
+    deleteAquarium: (companyId, aquariumId) => api.delete(`/companies/${companyId}/aquariums/${aquariumId}`),
+    feedNow: (aquariumId) => api.post(`/aquariums/${aquariumId}/feed-now`),
+    addFish: (aquariumId, fishData) => api.post(`/aquariums/${aquariumId}/fish`, fishData),
+    updateFish: (aquariumId, fishId, fishData) => api.put(`/aquariums/${aquariumId}/fish/${fishId}`, fishData),
+    removeFish: (aquariumId, fishId, quantity) => api.delete(`/aquariums/${aquariumId}/fish/${fishId}`, { params: { quantity } }),
+    getFish: (aquariumId) => api.get(`/aquariums/${aquariumId}/fish`),
+};
+
 export default api;

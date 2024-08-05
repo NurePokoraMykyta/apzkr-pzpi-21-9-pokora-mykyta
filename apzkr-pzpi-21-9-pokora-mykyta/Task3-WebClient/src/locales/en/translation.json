@@ -12,7 +12,8 @@
   "devices": "Devices",
   "feeders": "Feeders",
   "blog": "Blog",
-  "support": "Support",
+  "profile": "Profile",
+  "IoT": "IoT",
 
   "aboutUs": "About Us",
   "aboutCompany": "About Company",
@@ -34,5 +35,28 @@
   "latestAwards": "Latest Awards",
   "mentionsInMedia": "Mentions in Media",
 
-  "registrationSuccess": "You have successfully registered!"
+  "registrationSuccess": "You have successfully registered!",
+
+  "aquariumName": "Aquarium Name",
+  "capacity": "Capacity",
+  "liters": "Liters",
+  "description": "Description",
+  "update": "Update",
+  "create": "Create",
+  "noFishInAquarium": "No fish in this aquarium",
+  "feedNow": "Feed Now",
+  "addFish": "Add Fish",
+  "edit": "Edit",
+  "delete": "Delete",
+  "fish": "Fish",
+  "quantity": "Quantity",
+  "noCompanySelected": "No Company Selected",
+  "pleaseSelectCompanyHeader": "To access this feature, please select a company using the company button in the header.",
+  "companySelectionHelp": "Company Selection Help",
+  "useCompanyButtonToSelect": "Use the company button in the header to select a company.",
+  "createCompany": "Create Company",
+  "companyName": "Company Name",
+  "createCompanySuccess": "Company created successfully",
+  "myCompanies": "My Companies",
+  "createAquarium": "Create Aquarium"
 }
