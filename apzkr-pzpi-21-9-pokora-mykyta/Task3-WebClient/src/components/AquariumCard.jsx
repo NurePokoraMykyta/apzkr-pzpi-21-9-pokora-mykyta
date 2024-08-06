@@ -59,7 +59,7 @@ const AquariumCard = ({ aquarium, onFeedNow, onAddFish, onEditFish, onRemoveFish
                                     }
                                 >
                                     <ListItemText
-                                        primary={fish.species}
+                                        primary={`${fish.species}`}
                                         secondary={`${t('quantity')}: ${fish.quantity}`}
                                     />
                                 </ListItem>

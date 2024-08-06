@@ -3,6 +3,9 @@ import os
 import uvicorn
 from fastapi import FastAPI, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi.requests import Request
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
@@ -62,6 +65,16 @@ app.include_router(device_router, prefix=settings.API_STR, tags=["Пристро
 app.include_router(feeding_schedule_router, prefix=settings.API_STR, tags=["Розклади годування"])
 app.include_router(aquarium_feeding_router, prefix=settings.API_STR, tags=["Годування акваріумів"])
 app.include_router(ws_router, tags=["WebSocket"])
+
+
+@app.exception_handler(RequestValidationError)
+async def value_error_exception_handler(request: Request, exc: RequestValidationError):
+    error = exc.errors()[0]
+    print(error)
+    return JSONResponse(
+        status_code=400,
+        content={"detail": f"Помилка у {error['loc'][1]}, {error['msg']}"},
+    )
 
 
 @app.get("/")

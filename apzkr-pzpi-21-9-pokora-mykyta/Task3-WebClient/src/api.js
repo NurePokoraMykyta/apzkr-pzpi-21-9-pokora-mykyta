@@ -20,7 +20,7 @@ const isTokenExpired = (token) => {
 };
 
 api.interceptors.request.use((config) => {
-    if (!config.url.startsWith('/auth/') || config.url === '/auth/logout') {
+    if (!config.url.startsWith('/auth/') || config.url === '/auth/logout' || config.url === '/auth/me') {
         const token = localStorage.getItem('access_token');
         if (token) {
             if (isTokenExpired(token)) {
@@ -41,6 +41,9 @@ export const authApi = {
     register: (userData) => api.post('/auth/register', userData),
     login: (credentials) => api.post('/auth/login', credentials),
     logout: () => api.post('/auth/logout'),
+    getCurrentUser: () => api.get('/auth/me'),
+    updateProfile: (userData) => api.put('/auth/me', userData),
+    deleteAccount: () => api.delete('/auth/me'),
 };
 
 export const companyApi = {
@@ -59,8 +62,20 @@ export const companyApi = {
     deleteAquarium: (companyId, aquariumId) => api.delete(`/companies/${companyId}/aquariums/${aquariumId}`),
     feedNow: (aquariumId) => api.post(`/aquariums/${aquariumId}/feed-now`),
     addFish: (aquariumId, fishData) => api.post(`/aquariums/${aquariumId}/fish`, fishData),
-    updateFish: (aquariumId, fishId, fishData) => api.put(`/aquariums/${aquariumId}/fish/${fishId}`, fishData),
-    removeFish: (aquariumId, fishId, quantity) => api.delete(`/aquariums/${aquariumId}/fish/${fishId}`, { params: { quantity } }),
+    updateFish: (aquariumId, fishId, fishData, companyId) => api.put(`/aquariums/${aquariumId}/fish/${fishId}`, {
+        fish_data: {
+            species: fishData.species,
+            quantity: fishData.quantity
+        },
+        company_id: companyId
+    }),
+    removeFish: (aquariumId, fishId, companyId, quantity = null) =>
+        api.delete(`/aquariums/${aquariumId}/fish/${fishId}`, {
+            params: {
+                company_id: companyId,
+                ...(quantity !== null && { quantity })
+            }
+        }),
     getFish: (aquariumId) => api.get(`/aquariums/${aquariumId}/fish`),
 };
 

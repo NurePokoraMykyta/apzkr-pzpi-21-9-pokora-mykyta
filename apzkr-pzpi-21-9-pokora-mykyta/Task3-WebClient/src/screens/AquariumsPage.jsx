@@ -68,31 +68,66 @@ const AquariumsPage = () => {
         setIsFishFormOpen(true);
     };
 
-    const handleRemoveFish = async (aquariumId, fishId) => {
+    const handleRemoveFish = async (aquariumId, fishId, quantity = null) => {
         try {
-            await companyApi.removeFish(aquariumId, fishId);
-            fetchAquariums();
-            showAlert('success', t('fishRemoved'));
+            const response = await companyApi.removeFish(aquariumId, fishId, selectedCompany.id, quantity);
+            setAquariums(prevAquariums =>
+                prevAquariums.map(aquarium =>
+                    aquarium.id === aquariumId
+                        ? {
+                            ...aquarium,
+                            fish: aquarium.fish.map(fish => {
+                                if (fish.id === fishId) {
+                                    if (quantity === null || quantity >= fish.quantity) {
+                                        return null;
+                                    } else {
+                                        return { ...fish, quantity: fish.quantity - quantity };
+                                    }
+                                }
+                                return fish;
+                            }).filter(Boolean)
+                        }
+                        : aquarium
+                )
+            );
+            showAlert('success', response.data.message);
         } catch (error) {
             showAlert('error', error.response?.data?.detail || t('errorRemovingFish'));
         }
     };
 
     const handleSubmitFish = async (fishData) => {
-        const addFish = {
-            ...fishData,
-            company_id: selectedCompany.id
-        }
         try {
+            let updatedFish;
             if (currentFish && currentFish.id) {
-                await companyApi.updateFish(currentAquarium, currentFish.id, addFish);
-                console.log('Онова', fishData);
+                const response = await companyApi.updateFish(
+                    currentAquarium,
+                    currentFish.id,
+                    { species: fishData.species, quantity: fishData.quantity },
+                    selectedCompany.id
+                );
+                updatedFish = response.data;
             } else {
-                console.log('Не онова', fishData);
-                await companyApi.addFish(currentAquarium, addFish);
+                const response = await companyApi.addFish(currentAquarium, {
+                    ...fishData,
+                    company_id: selectedCompany.id
+                });
+                updatedFish = response.data;
             }
             setIsFishFormOpen(false);
-            showAlert('success', currentFish ? t('fishUpdated') : t('fishAdded'));
+            setAquariums(prevAquariums =>
+                prevAquariums.map(aquarium =>
+                    aquarium.id === currentAquarium
+                        ? {
+                            ...aquarium,
+                            fish: currentFish.id
+                                ? aquarium.fish.map(fish => fish.id === currentFish.id ? updatedFish : fish)
+                                : [...aquarium.fish, updatedFish]
+                        }
+                        : aquarium
+                )
+            );
+            showAlert('success', currentFish.id ? t('fishUpdated') : t('fishAdded'));
         } catch (error) {
             showAlert('error', error.response?.data?.detail || t('errorSavingFish'));
         }
