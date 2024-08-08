@@ -46,6 +46,14 @@ export const authApi = {
     deleteAccount: () => api.delete('/auth/me'),
 };
 
+export const rolesApi = {
+    createRole: (roleData) => api.post('/roles', roleData),
+    getCompanyRoles: (companyId) => api.get(`/roles/company/${companyId}`),
+    getCompanyRole: (companyId, roleId) => api.get(`/roles/company/${companyId}/role/${roleId}`),
+    updateRole: (roleId, roleData, companyId) => api.put(`/roles/company/${companyId}/role/${roleId}`, roleData),
+    assignRole: (roleId, userId, companyId) => api.post(`/roles/${roleId}/assign?user_id=${userId}&company_id=${companyId}`),
+};
+
 export const companyApi = {
     createCompany: (companyData) => api.post('/companies', companyData),
     getUserCompanies: () => api.get('/companies'),
@@ -77,6 +85,25 @@ export const companyApi = {
             }
         }),
     getFish: (aquariumId) => api.get(`/aquariums/${aquariumId}/fish`),
+    getCompanyUsers: (companyId) => api.get(`/companies/${companyId}/users`),
+};
+
+export const deviceApi = {
+    setupDevice: (aquariumId, deviceData) => api.post(`/devices/${aquariumId}`, deviceData),
+    getDevice: (aquariumId) => api.get(`/devices/${aquariumId}`),
+    updateDevice: (aquariumId, deviceData) => api.put(`/devices/${aquariumId}`, deviceData),
+    activateDevice: (aquariumId) => api.post(`/devices/${aquariumId}/activate`),
+    deactivateDevice: (aquariumId) => api.post(`/devices/${aquariumId}/deactivate`),
+    fillFoodPatch: (aquariumId, foodPatchData) => api.post(`/devices/${aquariumId}/food-patch`, foodPatchData),
+    deleteFoodPatch: (aquariumId) => api.delete(`/devices/${aquariumId}/food-patch`),
+};
+
+export const feedingScheduleApi = {
+    getAquariumFeedingSchedules: (aquariumId) => api.get(`/aquariums/${aquariumId}/feeding-schedules`),
+    addFeedingSchedule: (aquariumId, scheduleData) => api.post(`/aquariums/${aquariumId}/feeding-schedules`, scheduleData),
+    getFeedingSchedule: (scheduleId) => api.get(`/feeding-schedules/${scheduleId}`),
+    updateFeedingSchedule: (scheduleId, scheduleData) => api.put(`/feeding-schedules/${scheduleId}`, scheduleData),
+    deleteFeedingSchedule: (scheduleId) => api.delete(`/feeding-schedules/${scheduleId}`),
 };
 
 export default api;

@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authApi } from '../api';
 import { useTranslation } from "react-i18next";
 import {jwtDecode} from 'jwt-decode';
+import {useNavigate} from "react-router-dom";
 
 const AuthContext = createContext(null);
 
@@ -10,6 +11,7 @@ export const AuthProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
     const { t } = useTranslation();
+    const navigator = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
@@ -46,6 +48,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token_type');
         setUser(null);
         setError(null);
+        window.dispatchEvent(new CustomEvent('userLoggedOut'));
+        navigator('/');
     };
 
     const login = async (email, password) => {

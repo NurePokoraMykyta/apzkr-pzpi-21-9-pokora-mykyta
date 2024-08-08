@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import AquariumsPage from './screens/AquariumsPage';
 import FeedersPage from "./screens/FeedersPage";
 import DevicesPage from "./screens/DevicesPage";
-import BlogPage from "./screens/BlogPage";
 import ProfilePage from "./screens/ProfilePage";
 
 import CompanyRequiredWrapper from './components/CompanyRequiredWrapper';
 import AquariumIcon from '@mui/icons-material/SetMeal';
 import DevicesIcon from '@mui/icons-material/DevicesOther';
 import FeederIcon from '@mui/icons-material/Restaurant';
+import CompanyManagementPage from "./screens/CompanyManagmentPage";
+import BusinessIcon from "@mui/icons-material/Business";
 
 const RouteWrapper = ({ children, pageIcon, translationKey }) => {
     const { t } = useTranslation();
@@ -52,6 +53,14 @@ export const routes = [
             </RouteWrapper>
         )
     },
-    { name: 'blog', path: '/blog', component: BlogPage },
+    {
+        name: 'companyManagement',
+        path: '/company-management',
+        component: () => (
+            <RouteWrapper pageIcon={<BusinessIcon />} translationKey="companyManagement">
+                <CompanyManagementPage />
+            </RouteWrapper>
+        )
+    },
     { name: 'profile', path: '/profile', component: ProfilePage },
 ];

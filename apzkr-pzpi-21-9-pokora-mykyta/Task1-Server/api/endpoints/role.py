@@ -32,19 +32,20 @@ def require_permissions(*required_permissions: str):
     return decorator
 
 
-@role_router.post("", response_model=RoleResponse, summary="Створення ролі")
+@role_router.post("/company/{company_id}", response_model=RoleResponse, summary="Створення ролі")
 @require_permissions("manage_roles")
 async def create_role(
+        company_id: int,
         role_data: RoleCreate,
-        current_user: dict = Depends(get_current_user),
-        role_manager: RoleManager = Depends(get_role_manager)
+        current_user: Annotated[dict, Depends(get_current_user)],
+        role_manager: Annotated[RoleManager, Depends(get_role_manager)]
 ):
     try:
         new_role = role_manager.create_role(
             role_data.name,
             role_data.description,
             role_data.permissions,
-            role_data.company_id
+            company_id
         )
         return RoleResponse.from_orm(new_role)
     except ValueError as e:
@@ -81,26 +82,27 @@ async def get_company_role(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@role_router.put("/{role_id}", response_model=RoleResponse, summary="Оновлення ролі")
+@role_router.put("/company/{company_id}/role/{role_id}", response_model=RoleResponse, summary="Оновлення ролі")
 @require_permissions("manage_roles")
 async def update_role(
+        company_id: int,
         role_id: int,
         role_data: RoleUpdate,
         current_user: dict = Depends(get_current_user),
         role_manager: RoleManager = Depends(get_role_manager)
 ):
     try:
-        updated_role = role_manager.update_role_permissions(role_id, role_data.permissions)
-        return updated_role
+        updated_role = role_manager.update_role_permissions(company_id, role_id, role_data.permissions)
+        return RoleResponse.from_orm(updated_role)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @role_router.post("/{role_id}/assign", summary="Призначення ролі користувачу")
 @require_permissions("manage_roles")
 async def assign_role_to_user(
         role_id: int,
-        user_uid: str,
+        user_id: int,
         company_id: int,
         current_user: dict = Depends(get_current_user),
         role_manager: RoleManager = Depends(get_role_manager)
@@ -108,7 +110,7 @@ async def assign_role_to_user(
     if not role_manager.has_company_access(current_user['uid'], company_id):
         raise HTTPException(status_code=403, detail="Немає доступу до цієї компанії")
     try:
-        role_manager.assign_role(user_uid, role_id, company_id)
+        role_manager.assign_role(user_id, role_id, company_id)
         return {"message": "Роль успішно призначено користувачу"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

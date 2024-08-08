@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 from datetime import datetime
+
+from schemas.role_schemas import RoleResponse
 
 
 class CompanyCreate(BaseModel):
@@ -23,3 +25,17 @@ class CompanyFull(CompanyCreate):
 
 class CompanyResponse(CompanyFull):
     pass
+
+
+class UserCompanyResponse(BaseModel):
+    id: int = Field(..., description="ID користувача")
+    email: EmailStr = Field(..., description="Електронна пошта користувача")
+    display_name: Optional[str] = Field(None, description="Ім'я користувача для відображення")
+    phone_number: Optional[str] = Field(None, description="Номер телефону користувача")
+    status: str = Field(..., description="Статус користувача")
+    created_at: datetime = Field(..., description="Дата створення")
+    updated_at: Optional[datetime] = Field(None, description="Дата оновлення")
+    role: Optional[RoleResponse] = Field(None, description="Роль користувача в компанії")
+
+    class Config:
+        from_attributes = True

@@ -50,10 +50,14 @@ const AquariumsPage = () => {
 
     const handleFeedNow = async (aquariumId) => {
         try {
-            await companyApi.feedNow(aquariumId);
-            showAlert('success', t('feedingSuccessful'));
+            const response = await companyApi.feedNow(aquariumId);
+            if (response.data.status === 'success') {
+                showAlert('success', t('feedingSuccessful'));
+            } else {
+                showAlert('error', response.data.message);
+            }
         } catch (error) {
-            showAlert('error',error.response?.data?.detail || t('errorFeeding'));
+            showAlert('error', error.response?.data?.detail || t('errorFeeding'));
         }
     };
 

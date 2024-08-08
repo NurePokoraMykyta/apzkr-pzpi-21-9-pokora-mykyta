@@ -11,6 +11,11 @@ class UserStatus(enum.Enum):
     SUSPENDED = "suspended"
 
 
+company_roles = Table('company_roles', Base.metadata,
+                      Column('company_id', Integer, ForeignKey('companies.id'), primary_key=True),
+                      Column('role_id', Integer, ForeignKey('roles.id'), primary_key=True)
+                      )
+
 user_companies = Table('user_companies', Base.metadata,
                        Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
                        Column('company_id', Integer, ForeignKey('companies.id'), primary_key=True),

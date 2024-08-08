@@ -101,7 +101,7 @@ const ProfilePage = () => {
         <Container component="main" maxWidth="md" sx={{ mt: 4, mb: 4 }}>
             <Paper elevation={3} sx={{ p: 4 }}>
                 <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12} md={5}>
                         <Typography variant="h5" gutterBottom>
                             {t('profile')}
                         </Typography>
@@ -142,8 +142,12 @@ const ProfilePage = () => {
                         </form>
                     </Grid>
 
-                    <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Box sx={{ pl: { md: 4 }, borderLeft: { md: 1 }, borderColor: 'divider', height: '100%' }}>
+                    <Grid item xs={12} md={1} sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Divider orientation="vertical" sx={{ height: '100%' }} />
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                        <Box sx={{ pl: { md: 4 }, height: '100%' }}>
                             <Typography variant="h5" gutterBottom>
                                 {t('accountInfo')}
                             </Typography>

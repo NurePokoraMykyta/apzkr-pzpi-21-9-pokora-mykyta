@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 
-from data import Aquarium, Fish
+from data import Aquarium, Fish, Role
 from data.session import db_session
 from data.models.company import Company
 from data.models.user import user_companies
@@ -100,8 +100,23 @@ class CompanyService:
             user_companies.c.company_id == company_id
         ).all()
 
-    def add_user_to_company(self, company_id: int, email: str, role_id: int, firebase_uid: str):
-        self.get_user_company(company_id, firebase_uid)
+    def get_all_company_users(self, company_id: int):
+        company = self.db.query(Company).filter(Company.id == company_id).first()
+        if not company:
+            raise ValueError(f"Компанія з ID {company_id} не знайдена")
+
+        users_with_roles = self.db.query(User).join(user_companies).options(
+            joinedload(User.companies).joinedload(Company.roles)
+        ).filter(
+            user_companies.c.company_id == company_id
+        ).all()
+
+        if not users_with_roles:
+            return []
+
+        return users_with_roles
+
+    def add_user_to_company(self, company_id: int, email: str, role_id: int):
         user = self.db.query(User).filter(User.email == email).first()
         if not user:
             raise ValueError("Користувача не знайдено")

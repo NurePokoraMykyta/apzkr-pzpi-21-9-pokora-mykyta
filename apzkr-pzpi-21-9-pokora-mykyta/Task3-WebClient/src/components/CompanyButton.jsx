@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Button, Menu, MenuItem, Dialog } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { useCompany } from '../contexts/CompanyContext';
@@ -9,13 +9,14 @@ import { useTranslation } from "react-i18next";
 
 const CompanyButton = () => {
     const { user } = useAuth();
-    const { selectedCompany } = useCompany();
+    const { selectedCompany, setSelectedCompany  } = useCompany();
     const { t } = useTranslation();
     const [open, setOpen] = useState(null);
     const [openLoginModal, setOpenLoginModal] = useState(false);
     const [openRegisterModal, setOpenRegisterModal] = useState(false);
     const [openCompanyListDialog, setOpenCompanyListDialog] = useState(false);
     const [openCreateCompanyDialog, setOpenCreateCompanyDialog] = useState(false);
+
 
     const handleClick = (event) => {
         if (user) {
@@ -48,6 +49,7 @@ const CompanyButton = () => {
         setOpenRegisterModal(false);
         setOpenLoginModal(true);
     };
+
 
     return (
         <>

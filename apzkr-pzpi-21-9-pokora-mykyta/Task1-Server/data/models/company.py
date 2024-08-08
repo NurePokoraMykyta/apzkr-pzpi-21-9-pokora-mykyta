@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy.orm import relationship
 from data.session import Base
-from .user import user_companies
+from .user import user_companies, company_roles
 
 
 class Company(Base):
@@ -15,3 +15,4 @@ class Company(Base):
 
     users = relationship("User", secondary=user_companies, back_populates="companies")
     aquariums = relationship("Aquarium", back_populates="company")
+    roles = relationship("Role", secondary=company_roles, back_populates="companies")

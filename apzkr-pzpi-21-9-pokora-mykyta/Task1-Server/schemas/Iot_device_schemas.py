@@ -18,6 +18,7 @@ class IoTDeviceUpdate(BaseModel):
 class IoTDeviceResponse(IoTDeviceBase):
     id: int = Field(..., description="ID IoT пристрою")
     aquarium_id: int = Field(..., description="ID акваріума")
+    is_active: bool = Field(..., description="Статус активності пристрою")
 
     class Config:
         from_attributes = True

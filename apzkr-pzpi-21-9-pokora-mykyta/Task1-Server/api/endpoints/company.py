@@ -5,7 +5,7 @@ from typing import List, Annotated
 
 from data import Company, db_session
 from schemas.aquarium_schemas import AquariumResponse, AquariumCreate
-from schemas.company_schemas import CompanyCreate, CompanyUpdate, CompanyResponse
+from schemas.company_schemas import CompanyCreate, CompanyUpdate, CompanyResponse, UserCompanyResponse
 from services.user_service import user_service
 from services.company_service import CompanyService, get_company_manager
 from services.role_manager import RoleManager, get_role_manager
@@ -129,7 +129,7 @@ async def add_user_to_company(
         role_manager: RoleManager = Depends(get_role_manager)
 ):
     try:
-        return company_service.add_user_to_company(company_id, email, role_id, current_user['uid'])
+        return company_service.add_user_to_company(company_id, email, role_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -177,5 +177,21 @@ async def get_company_aquariums(
     try:
         aquariums = company_service.get_company_aquariums(company_id, current_user['uid'])
         return [AquariumResponse.from_orm(aquarium) for aquarium in aquariums]
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@company_router.get("/{company_id}/users", response_model=List[UserCompanyResponse],
+                    summary="Отримання всіх користувачів компанії")
+@require_permissions("view_company_users")
+async def get_all_company_users(
+        company_id: int = Path(..., description="ID компанії"),
+        current_user: dict = Depends(get_current_user),
+        company_service: CompanyService = Depends(get_company_manager),
+        role_manager: RoleManager = Depends(get_role_manager)
+):
+    try:
+        users = company_service.get_all_company_users(company_id)
+        return [UserCompanyResponse.from_orm(user) for user in users]
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
