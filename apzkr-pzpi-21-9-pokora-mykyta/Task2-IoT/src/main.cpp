@@ -27,8 +27,8 @@ const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 const char* websockets_server = "host.wokwi.internal";
 const uint16_t websockets_port = 8000;
-const char* websockets_route = "/ws/ESP32_001";
-const char* unique_address = "ESP32_001";
+const char* websockets_route = "/ws/ESP21_0";
+const char* unique_address = "ESP21_0";
 
 
 WebSocketsClient webSocket;

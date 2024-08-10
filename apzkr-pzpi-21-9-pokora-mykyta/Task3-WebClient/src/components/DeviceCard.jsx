@@ -4,12 +4,26 @@ import EditIcon from '@mui/icons-material/Edit';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { useTranslation } from 'react-i18next';
+import {useNavigate} from "react-router-dom";
 
 const DeviceCard = ({ device, aquarium, onEdit, onToggleActive, onManageFood }) => {
     const { t } = useTranslation();
-
+    const navigate = useNavigate();
+    console.log(device);
+    console.log("Аквариум");
     return (
-        <Card elevation={3}>
+        <Card elevation={3}
+              onClick={(e) => {
+                  if (!e.target.closest('button')) {
+                      navigate(`/devices/aquarium/${aquarium.id}`);
+                  }
+              }}
+              sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                      boxShadow: 6,
+                  },
+              }}>
             <CardContent>
                 <Typography variant="h6" gutterBottom>{device.unique_address}</Typography>
                 <Box display="flex" alignItems="center" mb={2}>

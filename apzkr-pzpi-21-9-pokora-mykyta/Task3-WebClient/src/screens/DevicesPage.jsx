@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Button, Snackbar, Alert, CircularProgress } from '@mui/material';
+import {Container, Typography, Grid, Button, Snackbar, Alert, CircularProgress, Box} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import DeviceCard from '../components/DeviceCard';
 import DeviceForm from '../components/DeviceForm';
@@ -152,10 +152,14 @@ const DevicesPage = () => {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h4" gutterBottom>{t('devices')}</Typography>
-            <Button variant="contained" color="primary" onClick={handleAddDevice} sx={{ mb: 3 }}>
-                {t('addDevice')}
-            </Button>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+                <Typography variant="h4" align="center" gutterBottom>
+                    {t('devices')}
+                </Typography>
+                <Button variant="contained" color="primary" onClick={handleAddDevice} sx={{ mt: 2 }}>
+                    {t('addDevice')}
+                </Button>
+            </Box>
             <Grid container spacing={3}>
                 {devices.map((device) => {
                     const aquarium = aquariums.find(a => a.id === device.aquarium_id);

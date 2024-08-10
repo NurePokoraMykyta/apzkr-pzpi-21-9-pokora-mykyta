@@ -24,7 +24,7 @@ const AquariumCard = ({ aquarium, onFeedNow, onAddFish, onEditFish, onRemoveFish
     const { t } = useTranslation();
 
     return (
-        <Card elevation={3} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Card elevation={3} sx={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '100%' }}>
             <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h5" component="div" gutterBottom>
                     {aquarium.name}

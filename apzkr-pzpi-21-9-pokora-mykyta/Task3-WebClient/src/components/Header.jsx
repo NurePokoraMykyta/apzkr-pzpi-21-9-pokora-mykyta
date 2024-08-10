@@ -168,11 +168,8 @@ const Header = () => {
             </AppBar>
             {user && (
                 <NavContainer>
-                    {routes.map((route) => (
-                        <StyledNavLink
-                            key={route.path}
-                            to={route.path}
-                        >
+                    {routes.filter(route => route.showInNavigation).map(route => (
+                        <StyledNavLink key={route.path} to={route.path}>
                             {t(route.name)}
                         </StyledNavLink>
                     ))}

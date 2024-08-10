@@ -12,7 +12,7 @@ from schemas.feeding_schemas import FeedingScheduleCreate, FeedingScheduleUpdate
 import logging
 
 from schemas.food_patch_schemas import FoodPatchCreate
-from schemas.water_parameter_schemas import WaterParameterCreate
+from schemas.water_parameter_schemas import WaterParameterCreate, WaterParameterResponse
 from services.connection_manager import ConnectionManager
 from fastapi import Depends
 
@@ -303,6 +303,16 @@ class DeviceFeedingService:
         self.db.delete(food_patch)
         self.db.commit()
         logger.info(f"Порція для акваріума {aquarium_id} успішно видалена")
+
+    def get_water_parameters(self, aquarium_id: int, start_date: datetime, end_date: datetime) -> List[WaterParameterResponse]:
+        water_parameters = self.db.query(WaterParameter).filter(
+            and_(
+                WaterParameter.aquarium_id == aquarium_id,
+                WaterParameter.measured_at >= start_date,
+                WaterParameter.measured_at <= end_date
+            )
+        ).order_by(WaterParameter.measured_at.desc()).all()
+        return [WaterParameterResponse.from_orm(param) for param in water_parameters]
 
 
 def get_device_feeding_service(

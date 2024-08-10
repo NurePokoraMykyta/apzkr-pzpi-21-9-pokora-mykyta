@@ -1,6 +1,6 @@
 // screens/CompanyManagementPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, TextField, Button, Box, Tabs, Tab, Snackbar, Alert } from '@mui/material';
+import {Container, Typography, TextField, Button, Box, Tabs, Tab, Snackbar, Alert, Paper, Grid} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useCompany } from '../contexts/CompanyContext';
 import { companyApi, rolesApi } from '../api';
@@ -128,21 +128,34 @@ const CompanyManagementPage = () => {
 
     return (
         <Container maxWidth="lg">
-            <Typography variant="h4" gutterBottom>{t('companyManagement')}</Typography>
-            <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
-                <Tab label={t('companyInfo')} />
-                <Tab label={t('users')} />
-                <Tab label={t('roles')} />
-            </Tabs>
+            <Typography variant="h4" align="center" gutterBottom sx={{ my: 4 }}>
+                {t('companyManagement')}
+            </Typography>
+
+            <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+                <Tabs
+                    value={tabValue}
+                    onChange={(e, newValue) => setTabValue(newValue)}
+                    variant="fullWidth"
+                    indicatorColor="primary"
+                    textColor="primary"
+                >
+                    <Tab label={t('companyInfo')} />
+                    <Tab label={t('users')} />
+                    <Tab label={t('roles')} />
+                </Tabs>
+            </Paper>
 
             {tabValue === 0 && (
-                <Box mt={3}>
+                <Paper elevation={3} sx={{ p: 4 }}>
+                    <Typography variant="h5" gutterBottom>{t('companyInfo')}</Typography>
                     <TextField
                         fullWidth
                         label={t('companyName')}
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
                         margin="normal"
+                        variant="outlined"
                     />
                     <TextField
                         fullWidth
@@ -152,20 +165,23 @@ const CompanyManagementPage = () => {
                         margin="normal"
                         multiline
                         rows={4}
+                        variant="outlined"
                     />
-                    <Button variant="contained" color="primary" onClick={handleUpdateCompany} sx={{ mt: 2, mr: 2 }}>
-                        {t('updateCompany')}
-                    </Button>
-                    <Button variant="contained" color="error" onClick={handleDeleteCompany} sx={{ mt: 2 }}>
-                        {t('deleteCompany')}
-                    </Button>
-                </Box>
+                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
+                        <Button variant="contained" color="primary" onClick={handleUpdateCompany}>
+                            {t('updateCompany')}
+                        </Button>
+                        <Button variant="outlined" color="error" onClick={handleDeleteCompany}>
+                            {t('deleteCompany')}
+                        </Button>
+                    </Box>
+                </Paper>
             )}
 
             {tabValue === 1 && (
-                <Box mt={3}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                        <Typography variant="h6">{t('companyUsers')}</Typography>
+                <Paper elevation={3} sx={{ p: 4 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                        <Typography variant="h5">{t('companyUsers')}</Typography>
                         <Button
                             variant="contained"
                             color="primary"
@@ -180,7 +196,45 @@ const CompanyManagementPage = () => {
                         onRemoveUser={handleRemoveUser}
                         onAssignRole={handleAssignRole}
                     />
-                </Box>
+                </Paper>
+            )}
+
+            {tabValue === 2 && (
+                <Paper elevation={3} sx={{ p: 4 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                        <Typography variant="h5">{t('roles')}</Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => {
+                                setCurrentRole(null);
+                                setOpenRoleForm(true);
+                            }}
+                        >
+                            {t('createRole')}
+                        </Button>
+                    </Box>
+                    <Grid container spacing={3}>
+                        {roles.map((role) => (
+                            <Grid item xs={12} sm={6} md={4} key={role.id}>
+                                <Paper elevation={2} sx={{ p: 2 }}>
+                                    <Typography variant="subtitle1" gutterBottom>{role.name}</Typography>
+                                    <Typography variant="body2" sx={{ mb: 2 }}>{role.description}</Typography>
+                                    <Button
+                                        variant="outlined"
+                                        fullWidth
+                                        onClick={() => {
+                                            setCurrentRole(role);
+                                            setOpenRoleForm(true);
+                                        }}
+                                    >
+                                        {t('edit')}
+                                    </Button>
+                                </Paper>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Paper>
             )}
 
             <AddUserDialog
@@ -189,38 +243,6 @@ const CompanyManagementPage = () => {
                 onAddUser={handleAddUser}
                 roles={roles}
             />
-
-            {tabValue === 2 && (
-                <Box mt={3}>
-                    <Typography variant="h6" gutterBottom>{t('roles')}</Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                            setCurrentRole(null);
-                            setOpenRoleForm(true);
-                        }}
-                        sx={{ mb: 2 }}
-                    >
-                        {t('createRole')}
-                    </Button>
-                    {roles.map((role) => (
-                        <Box key={role.id} mb={2}>
-                            <Typography variant="subtitle1">{role.name}</Typography>
-                            <Typography variant="body2">{role.description}</Typography>
-                            <Button
-                                variant="outlined"
-                                onClick={() => {
-                                    setCurrentRole(role);
-                                    setOpenRoleForm(true);
-                                }}
-                            >
-                                {t('edit')}
-                            </Button>
-                        </Box>
-                    ))}
-                </Box>
-            )}
 
             <RoleForm
                 open={openRoleForm}

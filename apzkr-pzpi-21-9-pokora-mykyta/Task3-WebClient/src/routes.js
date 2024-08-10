@@ -4,6 +4,7 @@ import AquariumsPage from './screens/AquariumsPage';
 import FeedersPage from "./screens/FeedersPage";
 import DevicesPage from "./screens/DevicesPage";
 import ProfilePage from "./screens/ProfilePage";
+import DeviceDetailPage from "./screens/DeviceDetailPage"; // Импортируем новую страницу
 
 import CompanyRequiredWrapper from './components/CompanyRequiredWrapper';
 import AquariumIcon from '@mui/icons-material/SetMeal';
@@ -33,7 +34,8 @@ export const routes = [
             <RouteWrapper pageIcon={<AquariumIcon />} translationKey="aquariums">
                 <AquariumsPage />
             </RouteWrapper>
-        )
+        ),
+        showInNavigation: true
     },
     {
         name: 'devices',
@@ -42,7 +44,18 @@ export const routes = [
             <RouteWrapper pageIcon={<DevicesIcon />} translationKey="devices">
                 <DevicesPage />
             </RouteWrapper>
-        )
+        ),
+        showInNavigation: true
+    },
+    {
+        name: 'deviceDetail',
+        path: '/devices/aquarium/:aquariumId',
+        component: () => (
+            <RouteWrapper pageIcon={<DevicesIcon />} translationKey="deviceDetail">
+                <DeviceDetailPage />
+            </RouteWrapper>
+        ),
+        showInNavigation: false
     },
     {
         name: 'feeders',
@@ -51,7 +64,8 @@ export const routes = [
             <RouteWrapper pageIcon={<FeederIcon />} translationKey="feeders">
                 <FeedersPage />
             </RouteWrapper>
-        )
+        ),
+        showInNavigation: true
     },
     {
         name: 'companyManagement',
@@ -60,7 +74,8 @@ export const routes = [
             <RouteWrapper pageIcon={<BusinessIcon />} translationKey="companyManagement">
                 <CompanyManagementPage />
             </RouteWrapper>
-        )
+        ),
+        showInNavigation: true
     },
-    { name: 'profile', path: '/profile', component: ProfilePage },
+    { name: 'profile', path: '/profile', component: ProfilePage, showInNavigation: true },
 ];

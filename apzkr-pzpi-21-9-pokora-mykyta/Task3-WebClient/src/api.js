@@ -96,6 +96,8 @@ export const deviceApi = {
     deactivateDevice: (aquariumId) => api.post(`/devices/${aquariumId}/deactivate`),
     fillFoodPatch: (aquariumId, foodPatchData) => api.post(`/devices/${aquariumId}/food-patch`, foodPatchData),
     deleteFoodPatch: (aquariumId) => api.delete(`/devices/${aquariumId}/food-patch`),
+    getWaterParameters: (aquariumId, startDate, endDate) =>
+        api.get(`/aquariums/${aquariumId}/water-parameters`, { params: { start_date: startDate, end_date: endDate } }),
 };
 
 export const feedingScheduleApi = {

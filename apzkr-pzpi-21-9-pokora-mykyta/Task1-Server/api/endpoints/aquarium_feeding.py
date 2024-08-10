@@ -1,8 +1,10 @@
+from datetime import datetime
 from functools import wraps
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from typing import List
 from schemas.feeding_schemas import FeedingScheduleCreate, FeedingScheduleResponse
+from schemas.water_parameter_schemas import WaterParameterResponse
 from services.device_feeding_service import DeviceFeedingService, get_device_feeding_service
 from services.role_manager import RoleManager, get_role_manager
 from api.user import get_current_user
@@ -90,3 +92,21 @@ async def feed_now(
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@aquarium_feeding_router.get("/water-parameters", response_model=List[WaterParameterResponse],
+                             summary="Отримання параметрів мікроклімату акваріума")
+@require_permissions("view_water_parameters")
+async def get_water_parameters(
+        aquarium_id: int = Path(..., description="ID акваріума"),
+        start_date: datetime = Query(..., description="Початкова дата"),
+        end_date: datetime = Query(..., description="Кінцева дата"),
+        current_user: dict = Depends(get_current_user),
+        device_service: DeviceFeedingService = Depends(get_device_feeding_service),
+        role_manager: RoleManager = Depends(get_role_manager)
+):
+    try:
+        water_parameters = device_service.get_water_parameters(aquarium_id, start_date, end_date)
+        return [WaterParameterResponse.from_orm(param) for param in water_parameters]
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

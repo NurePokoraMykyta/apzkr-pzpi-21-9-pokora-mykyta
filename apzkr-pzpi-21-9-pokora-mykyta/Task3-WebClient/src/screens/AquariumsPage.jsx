@@ -193,7 +193,7 @@ const AquariumsPage = () => {
     }
 
     return (
-        <Container maxWidth="lg" sx={{mt: 4}}>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4, overflow: 'hidden' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
                 <Typography variant="h4" align="center" gutterBottom>
                     {t('aquariums')}
