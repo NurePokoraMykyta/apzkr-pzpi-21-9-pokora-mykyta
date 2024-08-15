@@ -29,7 +29,7 @@ const CreateCompanyForm = ({ onSuccess }) => {
             )}
             <TextField
                 fullWidth
-                label="Название компании"
+                label="Назва компанії"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 margin="normal"
@@ -37,7 +37,7 @@ const CreateCompanyForm = ({ onSuccess }) => {
             />
             <TextField
                 fullWidth
-                label="Описание"
+                label="Опис"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 margin="normal"
@@ -45,7 +45,7 @@ const CreateCompanyForm = ({ onSuccess }) => {
                 rows={3}
             />
             <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-                Создать компанию
+                Створити компанії
             </Button>
         </Box>
     );

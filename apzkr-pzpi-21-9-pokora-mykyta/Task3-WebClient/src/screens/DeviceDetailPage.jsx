@@ -42,7 +42,7 @@ const DeviceDetailPage = () => {
 
             setWaterParameters(parametersResponse.data);
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error(error?.response?.data?.detail || error.message);
         } finally {
             setLoading(false);
         }
