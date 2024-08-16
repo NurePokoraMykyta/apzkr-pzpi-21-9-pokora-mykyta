@@ -6,7 +6,6 @@ from typing import List, Annotated
 from data import Company, db_session
 from schemas.aquarium_schemas import AquariumResponse, AquariumCreate
 from schemas.company_schemas import CompanyCreate, CompanyUpdate, CompanyResponse, UserCompanyResponse
-from services.user_service import user_service
 from services.company_service import CompanyService, get_company_manager
 from services.role_manager import RoleManager, get_role_manager
 from api.user import get_current_user
@@ -163,6 +162,24 @@ async def create_aquarium(
         return AquariumResponse.from_orm(new_aquarium)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@company_router.delete("/{company_id}/aquariums/{aquarium_id}", summary="Видалення акваріума")
+@require_permissions("delete_aquarium")
+async def delete_company_aquarium(
+    company_id: int = Path(..., description="ID компанії"),
+    aquarium_id: int = Path(..., description="ID акваріума"),
+    current_user: dict = Depends(get_current_user),
+    company_service: CompanyService = Depends(get_company_manager),
+    role_manager: RoleManager = Depends(get_role_manager)
+):
+    try:
+        result = company_service.delete_company_aquarium(company_id, aquarium_id, current_user['uid'])
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Помилка при видаленні акваріума: {str(e)}")
 
 
 @company_router.get("/{company_id}/aquariums", response_model=List[AquariumResponse],

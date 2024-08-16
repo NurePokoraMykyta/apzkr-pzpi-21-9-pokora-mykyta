@@ -15,7 +15,7 @@ class Aquarium(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     company = relationship("Company", back_populates="aquariums")
-    feeding_schedules = relationship("FeedingSchedule", back_populates="aquarium")
-    water_parameters = relationship("WaterParameter", back_populates="aquarium")
-    fish = relationship("Fish", back_populates="aquarium")
-    iot_device = relationship("IoTDevice", back_populates="aquarium", uselist=False)
+    feeding_schedules = relationship("FeedingSchedule", back_populates="aquarium", cascade="all, delete-orphan")
+    water_parameters = relationship("WaterParameter", back_populates="aquarium", cascade="all, delete-orphan")
+    fish = relationship("Fish", back_populates="aquarium", cascade="all, delete-orphan")
+    iot_device = relationship("IoTDevice", back_populates="aquarium", uselist=False, cascade="all, delete-orphan")

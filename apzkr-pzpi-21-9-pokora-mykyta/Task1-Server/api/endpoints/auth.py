@@ -36,33 +36,32 @@ def logout(current_user: dict = Depends(get_current_user)):
 
 
 @auth_router.get("/me", summary="Отримання даних користувача")
-def get_user(current_user: dict = Depends(get_current_user), db: Session = Depends(db_session)):
+def get_user(user_service: UserService = Depends(get_user_service)):
     try:
-        return user_service.get_user_by_uid(db, current_user['uid'])
+        return user_service.get_user_by_uid(user_service.current_user['uid'])
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
 @auth_router.put("/me", summary="Оновлення даних користувача")
 def update_user(
-        user: UserUpdateRequest,
-        current_user: dict = Depends(get_current_user),
-        db: Session = Depends(db_session)
+    user: UserUpdateRequest,
+    user_service: UserService = Depends(get_user_service)
 ):
     try:
-        updated_user = user_service.update_user(
-            db,
-            current_user['uid'],
-            user
-        )
+        updated_user = user_service.update_user(user)
         return {"message": "Користувача успішно оновлено", "user": updated_user}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException as he:
+        logger.error(f"HTTP ошибка при обновлении пользователя: {he.detail}")
+        raise he
+    except Exception as e:
+        logger.exception(f"Неожиданная ошибка при обновлении пользователя: {str(e)}")
+        raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
 
 
 @auth_router.delete("/me", summary="Видалення користувача")
-def delete_user(current_user: dict = Depends(get_current_user), db: Session = Depends(db_session)):
+def delete_user(user_service: UserService = Depends(get_user_service)):
     try:
-        return user_service.delete_user(db, current_user['uid'])
+        return user_service.delete_user()
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
